@@ -42,7 +42,7 @@ public class LoginServlet extends HttpServlet {
          * 
          * if (session.getAttribute("username") == null ||
          * session.getAttribute("username").equals("")) {
-         * // TODO: handle unexpected access(siguro check lang if nakalogin as user from
+         * // handle unexpected access(siguro check lang if nakalogin as user from
          * // session obj)
          * throw new UnauthorizedAccessException();
          * }
@@ -54,18 +54,15 @@ public class LoginServlet extends HttpServlet {
         String password = request.getParameter("password");
 
         // 3. GET DATABASE DATA
-        // get username and password from database
-        Map<String, String> map = new HashMap<>();
-        String userRole = "";
 
         // 4. INITIALIZE MODELS
         
         Accounts accounts = new Accounts();
         //tester
         System.out.println("DIDNT RUN HERE");
-        map = accounts.getCredentials();
+        Map<String, String> map = accounts.getCredentials();
         
-        userRole = accounts.findUserByUsername(username).getUserRole();
+        String userRole = accounts.findUserByUsername(username).getUserRole();
         
 
         // 5. SERVLET LOGIC
@@ -130,7 +127,6 @@ public class LoginServlet extends HttpServlet {
             response.sendRedirect("admin/admin.jsp");
             return;
         }
-
     }
 
     /**

@@ -46,12 +46,6 @@ public class SignUpServlet extends HttpServlet {
         // 4. INITIALIZE MODELS
 
         // 5. SERVLET LOGIC
-        // Check if the username and password length is within varchar(30)
-        if(username.length() > 30 || password.length() > 30) {
-            request.setAttribute("error", "Username and password must be 30 characters or less.");
-            request.getRequestDispatcher("signup.jsp").forward(request, response);
-            return;
-        }
 
         // Validate for empty username or password
         if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
@@ -59,6 +53,15 @@ public class SignUpServlet extends HttpServlet {
             request.getRequestDispatcher("signup.jsp").forward(request, response);
             return;
         }
+        
+        // Check if the username and password length is within varchar(30)
+        if(username.length() > 30 || password.length() > 30) {
+            request.setAttribute("error", "Username and password must be 30 characters or less.");
+            request.getRequestDispatcher("signup.jsp").forward(request, response);
+            return;
+        }
+
+        
 
         // Validate for valid username format (alphanumeric only)
         if (!username.matches("^[a-zA-Z0-9]+$")) {
