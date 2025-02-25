@@ -13,6 +13,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
+import com.mycompany.webapplicationdb.model.Accounts;
+import com.mycompany.webapplicationdb.model.User;
+
 /**
  *
  * @author Vince
@@ -28,9 +32,10 @@ public class SignUpServlet extends HttpServlet {
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
+     * @throws DatabaseConnectionFailedException 
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, DatabaseConnectionFailedException {
         response.setContentType("text/html;charset=UTF-8");
         // 1. HANDLE UNEXPECTED ACCESS(Session)(for other than login and signup)
         HttpSession session = request.getSession();
@@ -53,15 +58,13 @@ public class SignUpServlet extends HttpServlet {
             request.getRequestDispatcher("signup.jsp").forward(request, response);
             return;
         }
-        
+
         // Check if the username and password length is within varchar(30)
         if(username.length() > 30 || password.length() > 30) {
             request.setAttribute("error", "Username and password must be 30 characters or less.");
             request.getRequestDispatcher("signup.jsp").forward(request, response);
             return;
         }
-
-        
 
         // Validate for valid username format (alphanumeric only)
         if (!username.matches("^[a-zA-Z0-9]+$")) {
@@ -70,13 +73,20 @@ public class SignUpServlet extends HttpServlet {
             return;
         }
 
-        // Validate password strength (at least 8 characters, 1 uppercase, 1 lowercase, 1 digit)
-        if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$")) {
-            request.setAttribute("error", "Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, and a digit.");
+        Accounts accounts = new Accounts();
+        
+        // Validate if username is already in database
+        if (accounts.getUser(username) != null) {
+            request.setAttribute("error", "Username already exists.");
             request.getRequestDispatcher("signup.jsp").forward(request, response);
             return;
         }
+
+        
         // 6. SET TO DATABASE
+        accounts.addUser(new User(username, password, "guest"));
+        //tester
+        System.out.println("Created new user");
         
 
         // 7. REDIRECT LOGIC
@@ -84,10 +94,6 @@ public class SignUpServlet extends HttpServlet {
         session.setAttribute("user_role", "guest");
 
         response.sendRedirect("landing.jsp");
-
-        
-        
-
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)

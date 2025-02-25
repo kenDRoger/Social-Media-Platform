@@ -6,7 +6,6 @@ package com.mycompany.webapplicationdb.controller;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -19,7 +18,6 @@ import javax.servlet.http.HttpSession;
 import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
 import com.mycompany.webapplicationdb.exception.UnauthorizedAccessException;
 import com.mycompany.webapplicationdb.model.Accounts;
-import com.mycompany.webapplicationdb.model.User;
 
 /**
  *
@@ -58,8 +56,6 @@ public class LoginServlet extends HttpServlet {
         // 4. INITIALIZE MODELS
         
         Accounts accounts = new Accounts();
-        //tester
-        System.out.println("DIDNT RUN HERE");
         Map<String, String> map = accounts.getCredentials();
         
         String userRole = accounts.findUserByUsername(username).getUserRole();
@@ -86,27 +82,17 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("user_role", userRole);
         }
 
-        // TESTER
-        System.out.println("username:" + username);
-        System.out.println("pass:" + password);
-        System.out.println("role:" + userRole);
-        System.out.println("TESTST");
 
         // 6. REDIRECT LOGIC
         // check if user is guest
         if (userRole.equals("guest")) {
             // TODO: set session attribute for landing page
 
+
             // forward to landing page
             response.sendRedirect("landing.jsp");
             return;
         }
-
-        // 7. SEND DATA THROUGH ATTRIBUTES
-        // get list of users
-        List<User> guests = accounts.getAccountsByRole("guest");
-        // set session attribute for admin.jsp
-        session.setAttribute("guests", guests);
 
         // check if user is admin
         if (userRole.equals("admin")) {
@@ -118,10 +104,7 @@ public class LoginServlet extends HttpServlet {
         if (userRole.equals("super_admin")) {
             // get list of users
             // TODO: Additional code for when super admin is confirmed to be able to CRUD
-            List<User> admins = accounts.getAccountsByRole("admin");
-
-            // set attribute for admin.jsp
-            session.setAttribute("admins", admins);
+            
 
             // forward to admin page
             response.sendRedirect("admin/admin.jsp");

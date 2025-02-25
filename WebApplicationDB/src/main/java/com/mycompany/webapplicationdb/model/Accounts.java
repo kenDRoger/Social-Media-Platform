@@ -4,7 +4,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
@@ -27,8 +26,8 @@ public class Accounts extends ArrayList<User>{
         return credentials;
     }
 
-    public List<User> getAccountsByRole(String... userRole){
-        List<User> users = new ArrayList<>();
+    public ArrayList<User> getAccountsByRole(String... userRole){
+        ArrayList<User> users = new ArrayList<>();
         for(User user : this){
             for(String role : userRole){
                 if(user.getUserRole().equals(role)){
@@ -54,7 +53,7 @@ public class Accounts extends ArrayList<User>{
         add(user);
     }
 
-    public List<User> getUsers() {
+    public ArrayList<User> getUsers() {
         return this;
     }
 
