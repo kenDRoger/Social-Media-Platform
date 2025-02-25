@@ -25,7 +25,7 @@
                                 //TODO: handle unexpected access
                             }
 
-                            List<User> users = (List<User>) request.getAttribute("guests");//Must use diamond operator with Datatype
+                            List<User> users = (List<User>) session.getAttribute("guests");//Must use diamond operator with Datatype
 
                             if (users != null) {
                                 for (User user : users) {
@@ -51,7 +51,7 @@
             <h2>List of Admins</h2>
             <table border="1">
                 <%
-                    List<User> admins = (List<User>) request.getAttribute("admins");
+                    List<User> admins = (List<User>) session.getAttribute("admins");
 
                     for (User user : admins) {
                 %>
