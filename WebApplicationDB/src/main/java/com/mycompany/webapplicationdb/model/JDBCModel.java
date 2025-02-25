@@ -2,12 +2,9 @@ package com.mycompany.webapplicationdb.model;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
 import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_PASSWORD;
@@ -61,82 +58,32 @@ public class JDBCModel {
             } else {
                 System.out.println("Unknown Exception");
             }
-            // TODO: handle this exception(in web.xml then add an error page)
             throw new DatabaseConnectionFailedException();
         }
     }
 
-    // Method to get a HashMap of Usernames and passwords from Connection
-    public Map<String, String> getCredentials() throws DatabaseConnectionFailedException {
+
+    // Method to get the list of accounts from Connection
+    public Accounts getAccounts() throws DatabaseConnectionFailedException {
         conn = renewConnection();
-        Map<String, String> credentials = new HashMap<>();
-        String query = "SELECT username, password FROM account";
-
+        Accounts accounts = new Accounts();
+        String query = "SELECT * FROM account";
         try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
-
             while (rs.next()) {
                 String u = rs.getString("username");
                 String p = rs.getString("password");
-                credentials.put(u, p);
+                String role = rs.getString("user_role");
+                accounts.add(new User(u, p, role));
             }
         } catch (SQLException e) {
-            //TODO: handle query exception
+            throw new DatabaseConnectionFailedException();
         }
-
-        return credentials;
-    }
-
-    // Method to get the user_role using username from Connection
-    public String getUserRole(String username) throws DatabaseConnectionFailedException {
-        conn = renewConnection();
-        String role = "";
-        String query = "SELECT user_role FROM account WHERE username = ?";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setString(1, username);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    role = rs.getString("user_role");
-                }
-            }
-        } catch (SQLException e) {
-            //TODO: handle query exception
-        }
-
-        return role;
-    }
-
-    // Method to get the list of accounts based on user_role from Connection
-    public Accounts getAccountsByRole(String... userRole) throws DatabaseConnectionFailedException {
-        conn = renewConnection();
-        Accounts accounts = new Accounts();
-        StringBuilder queryBuilder = new StringBuilder("SELECT * FROM account WHERE user_role IN (");
-        for (int i = 0; i < userRole.length; i++) {
-            queryBuilder.append("?");
-            if (i < userRole.length - 1) {
-                queryBuilder.append(",");
-            }
-        }
-        queryBuilder.append(")");
-        String query = queryBuilder.toString();
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            for (int i = 0; i < userRole.length; i++) {
-                pstmt.setString(i + 1, userRole[i]);
-            }
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    String u = rs.getString("username");
-                    String p = rs.getString("password");
-                    String role = rs.getString("user_role");
-                    accounts.add(new User(u, p, role));
-                }
-            }
-        } catch (SQLException e) {
-            //TODO: handle query exception
-        }
-
         return accounts;
+    }
+
+    // method to get Connection
+    public Connection getConnection(){
+        return conn;
     }
 
 
