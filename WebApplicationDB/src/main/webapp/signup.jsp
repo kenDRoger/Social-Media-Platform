@@ -18,6 +18,12 @@
             <label>Password: <input type="password" name="password" /></label><br>
             <input type="submit" value="Sign Up" />
             <p>Already a member? <a href="login.jsp">Login</a></p>
+            <%
+                String errorMessage = (String) request.getAttribute("errorMessage");
+                if (errorMessage != null && !errorMessage.isEmpty()) {
+            %>
+            <p style="color:red;"><%= errorMessage %></p>
+            <% } %>
         </form>
     </body>
 </html>
