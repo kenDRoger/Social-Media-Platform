@@ -1,5 +1,6 @@
 package com.mycompany.webapplicationdb.model;
 
+import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -112,7 +113,4 @@ public class JDBCModel {
         } catch (DatabaseConnectionFailedException ex) {
         }
     }
-}
-
-class DatabaseConnectionFailedException extends Exception {
 }
