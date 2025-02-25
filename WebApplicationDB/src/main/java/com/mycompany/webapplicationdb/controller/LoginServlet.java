@@ -5,7 +5,6 @@
 package com.mycompany.webapplicationdb.controller;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +16,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
+import com.mycompany.webapplicationdb.model.Accounts;
 import com.mycompany.webapplicationdb.model.JDBCModel;
+import com.mycompany.webapplicationdb.model.MySQLCredentials;
+import com.mycompany.webapplicationdb.model.User;
 
 /**
  *
@@ -39,8 +41,6 @@ public class LoginServlet extends HttpServlet {
             throws ServletException, IOException, DatabaseConnectionFailedException {
         response.setContentType("text/html;charset=UTF-8");
 
-        //TODO: handle inexpected access(siguro check lang if nakalogin as user from session obj)
-
         // get the username and password from the form
         String username = request.getParameter("username");
         String password = request.getParameter("password");
@@ -49,59 +49,106 @@ public class LoginServlet extends HttpServlet {
         JDBCModel model;
         Map<String, String> map = new HashMap<>();
         String userRole = "";
-        try{
-            model = new JDBCModel();
-            map = model.getCredentials();
-            userRole = model.getUserRole(username);
-        } catch (DatabaseConnectionFailedException ex) {
-            //TODO: handle exception(web.xml then add an error page)
-            request.setAttribute("error", "Database connection failed");
-            request.getRequestDispatcher("/error.jsp").forward(request, response);
-        }
 
-        // check if username exists
-        if (!map.containsKey(username)) {
-            request.setAttribute("error", "Username does not exist");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
-            return;
+        // check if session object has attribute username
+
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("username") == null) {
+            // TODO: handle unexpected access(siguro check lang if nakalogin as user from
+            // session obj)
+
         }
-        // check if password is correct
-        if (!map.get(username).equals(password)) {
-            request.setAttribute("error", "Password is incorrect");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
-            return;
+        // check if session object has attribute username(if user is already logged in)
+        if (session.getAttribute("username") != null) {
+            try {
+                model = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+                map = model.getCredentials();
+                userRole = model.getUserRole(username);
+            } catch (DatabaseConnectionFailedException ex) {
+                // TODO: handle exception(web.xml then add an error page)
+                request.setAttribute("error", "Database connection failed");
+                request.getRequestDispatcher("/error.jsp").forward(request, response);
+            }
+
+            // check if username exists
+            if (!map.containsKey(username)) {
+                request.setAttribute("error", "Username does not exist");
+                request.getRequestDispatcher("login.jsp").forward(request, response);
+                return;
+            }
+            // check if password is correct
+            if (!map.get(username).equals(password)) {
+                request.setAttribute("error", "Password is incorrect");
+                request.getRequestDispatcher("login.jsp").forward(request, response);
+                return;
+            }
+
+            // set attribute for authentication in each page
+            session.setAttribute("username", username);
+            session.setAttribute("user_role", userRole);
         }
-        
-        // set session object for authentication in each page
-        HttpSession session = request.getSession();
-        session.setAttribute("username", username);
-        session.setAttribute("user_role", userRole);
 
         // check if user is guest
         if (userRole.equals("guest")) {
-            // redirect to admin page
-            response.sendRedirect("landing.jsp");
+            // TODO: set request attribute for landing page
+
+            // forward to landing page
+            request.getRequestDispatcher("landing.jsp").forward(request, response);
             return;
         }
+
+        // get list of users
+        JDBCModel model2;
+        model2 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+        Accounts guests = new Accounts();
+        for (User user : model2.getAccountsByRole("guest")) {
+            guests.addUser(user);
+        }
+
+        // set request attribute for admin.jsp
+        request.setAttribute("guests", guests);
 
         // check if user is admin
-        if (userRole.equals("admin") || userRole.equals("super_admin")) {
-            // redirect to admin page
-            response.sendRedirect("admin/admin.jsp");
+        if (userRole.equals("admin")) {
+            // TODO: handle exception(web.xml then add an error page)
+            request.setAttribute("error", "Database connection failed");
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
+
+            // forward to admin page
+            request.getRequestDispatcher("admin/admin.jsp").forward(request, response);
             return;
         }
 
-        //TODO: lalagay pa ba to?
-        try (PrintWriter out = response.getWriter()) {
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet LoginServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet LoginServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+        // check if user is super admin
+        if (userRole.equals("super_admin")) {
+            // get list of users
+            JDBCModel model3;
+            model3 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+            Accounts admins = new Accounts();
+            // TODO: Additional code for when super admin is confirmed to be able to CRUD
+            for (User user : model3.getAccountsByRole("admin")) {
+                admins.addUser(user);
+            }
+
+            // set attribute for admin.jsp
+            request.setAttribute("users", admins);
+            // TODO: web.xml then add an error page
+            request.setAttribute("error", "Database connection failed");
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
+
+            // forward to admin page
+            request.getRequestDispatcher("admin/super_admin.jsp").forward(request, response);
+            return;
+        }
+    }
+
+    protected void processRequestException(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            processRequest(request, response);
+        } catch (DatabaseConnectionFailedException ex) {
+            request.setAttribute("error", "Database connection failed");
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }
 
@@ -118,12 +165,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            processRequest(request, response);
-        } catch (DatabaseConnectionFailedException ex) {
-            request.setAttribute("error", "Database connection failed");
-            request.getRequestDispatcher("/error.jsp").forward(request, response);
-        }
+        processRequestException(request, response);
     }
 
     /**
@@ -137,11 +179,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            processRequest(request, response);
-        } catch (DatabaseConnectionFailedException ex) {
-            request.setAttribute("error", "Database connection failed");
-            request.getRequestDispatcher("/error.jsp").forward(request, response);        }
+        processRequestException(request, response);
     }
 
     /**
