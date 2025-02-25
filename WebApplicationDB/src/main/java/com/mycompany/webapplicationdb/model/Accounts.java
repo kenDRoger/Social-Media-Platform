@@ -3,27 +3,25 @@ package com.mycompany.webapplicationdb.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Account {
-    private List<User> users;
+public class Accounts extends ArrayList<User>{
 
-    public Account() {
-        this.users = new ArrayList<>();
+    public Accounts() {
     }
 
     public void addUser(User user) {
-        users.add(user);
+        add(user);
     }
 
     public List<User> getUsers() {
-        return users;
+        return this;
     }
 
     public User findUserByUsername(String username) {
-        for (User user : users) {
+        for (User user : this) {
             if (user.getUsername().equals(username)) {
                 return user;
             }
         }
-        return null; // User not found
+        return null; // TODO: User not found
     }
 }
