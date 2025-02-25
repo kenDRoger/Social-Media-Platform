@@ -19,7 +19,7 @@
             <input type="submit" value="Sign Up" />
             <p>Already a member? <a href="login.jsp">Login</a></p>
             <%
-                String errorMessage = (String) request.getAttribute("errorMessage");
+                String errorMessage = (String) request.getAttribute("error");
                 if (errorMessage != null && !errorMessage.isEmpty()) {
             %>
             <p style="color:red;"><%= errorMessage %></p>

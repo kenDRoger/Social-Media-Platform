@@ -1,8 +1,20 @@
 <%-- Document : admin Created on : 02 24, 25, 3:10:37 PM Author : ken --%>
+<%@page import="com.mycompany.webapplicationdb.model.Accounts"%>
 <%@page import="java.util.ArrayList"%>
-<%@page import="java.util.List"%>
 <%@page import="com.mycompany.webapplicationdb.model.User"%>
+<%@page import="javax.servlet.http.HttpSession"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%
+    session = request.getSession();
+    if(session.getAttribute("username") == null){
+        //TODO: handle unexpected access
+        
+    }
+    
+    Accounts accounts = new Accounts();
+    ArrayList<User> guests = accounts.getAccountsByRole("guest");
+    ArrayList<User> admins = accounts.getAccountsByRole("admin");
+%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -14,8 +26,6 @@
         <div class="guests-block">
             <h2>List of Guests</h2>
             <table border="1">
-                <!--TODO: Iterate through the list of guests using JDBCModel object and its function -->
-
                 <tr><th>Username</th><th>Role</th></tr>
                         <%
                             String userRole = "";
@@ -25,10 +35,8 @@
                                 //TODO: handle unexpected access
                             }
 
-                            List<User> users = (List<User>) session.getAttribute("guests");//Must use diamond operator with Datatype
-
-                            if (users != null) {
-                                for (User user : users) {
+                            if (guests != null) {
+                                for (User user : guests) {
 
                         %>
                 <tr>
@@ -47,12 +55,11 @@
             </div>
         </div>
         <%if (userRole.equals("super_admin")) {%>
-        <div class="admin-block">
+        <div class="super_admin-block">
             <h2>List of Admins</h2>
             <table border="1">
                 <%
-                    List<User> admins = (List<User>) session.getAttribute("admins");
-
+                    //TODO: wait for instructions about what to put for admin block
                     for (User user : admins) {
                 %>
                 <tr>
