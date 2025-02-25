@@ -88,6 +88,12 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("username", username);
             session.setAttribute("user_role", userRole);
         }
+        
+        //TESTER
+        System.out.println("username:"+username);
+        System.out.println("pass:"+password);
+        System.out.println("role:"+userRole);
+        System.out.println("TESTST");
 
         // check if user is guest
         if (userRole.equals("guest")) {
@@ -108,6 +114,7 @@ public class LoginServlet extends HttpServlet {
 
         // set request attribute for admin.jsp
         request.setAttribute("guests", guests);
+        
 
         // check if user is admin
         if (userRole.equals("admin")) {
@@ -129,16 +136,14 @@ public class LoginServlet extends HttpServlet {
             }
 
             // set attribute for admin.jsp
-            request.setAttribute("users", admins);
+            request.setAttribute("admins", admins);
 
             // forward to admin page
-            request.getRequestDispatcher("admin/super_admin.jsp").forward(request, response);
+            request.getRequestDispatcher("admin/admin.jsp").forward(request, response);
             return;
         }
-        System.out.println("username:"+username);
-        System.out.println("pass:"+password);
-        System.out.println("role:"+userRole);
-        System.out.println("TESTST");
+        
+        
     }
 
     protected void processRequestException(HttpServletRequest request, HttpServletResponse response)
