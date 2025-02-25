@@ -18,9 +18,9 @@ import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_USER
 public class JDBCModel {
 
     private Connection conn;
-    private String jdbcUrl;
-    private String userName;
-    private String password;
+    private final String jdbcUrl;
+    private final String userName;
+    private final String password;
 
     // Default dont change, if you want to change values for your database change in
     // MySQLCredentials
@@ -138,6 +138,7 @@ public class JDBCModel {
 
         return accounts;
     }
+
 
     public static void main(String[] args) {
         try {

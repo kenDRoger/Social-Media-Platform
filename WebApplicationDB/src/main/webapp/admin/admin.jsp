@@ -36,7 +36,6 @@
                     <td><%= user.getUserRole()%></td>
                 </tr>
                 <%
-
                         }
                     }
                 %>
