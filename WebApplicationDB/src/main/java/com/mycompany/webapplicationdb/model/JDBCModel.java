@@ -11,6 +11,7 @@ import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_PASS
 import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_PORT;
 import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_SERVERHOST;
 import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_USERNAME;
+import java.util.ArrayList;
 
 public class JDBCModel {
 
@@ -64,9 +65,9 @@ public class JDBCModel {
 
 
     // Method to get the list of accounts from Connection
-    public Accounts getAccounts() throws DatabaseConnectionFailedException {
+    public ArrayList<User> getAccounts() throws DatabaseConnectionFailedException {
         conn = renewConnection();
-        Accounts accounts = new Accounts();
+        ArrayList<User> accounts = new ArrayList<User>();
         String query = "SELECT * FROM account";
         try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {

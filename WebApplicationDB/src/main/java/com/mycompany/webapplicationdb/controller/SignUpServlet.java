@@ -5,12 +5,13 @@
 package com.mycompany.webapplicationdb.controller;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -28,21 +29,71 @@ public class SignUpServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        // 1. HANDLE UNEXPECTED ACCESS(Session)(for other than login and signup)
+        HttpSession session = request.getSession();
+        
+
+        // 2. GET PARAMETERS
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+
+        // 3. GET DATABASE DATA
+        
+
+        // 4. INITIALIZE MODELS
+
+        // 5. SERVLET LOGIC
+        // Check if the username and password length is within varchar(30)
+        if(username.length() > 30 || password.length() > 30) {
+            request.setAttribute("error", "Username and password must be 30 characters or less.");
+            request.getRequestDispatcher("signup.jsp").forward(request, response);
+            return;
+        }
+
+        // Validate for empty username or password
+        if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
+            request.setAttribute("error", "Username and password cannot be empty.");
+            request.getRequestDispatcher("signup.jsp").forward(request, response);
+            return;
+        }
+
+        // Validate for valid username format (alphanumeric only)
+        if (!username.matches("^[a-zA-Z0-9]+$")) {
+            request.setAttribute("error", "Username can only contain alphanumeric characters.");
+            request.getRequestDispatcher("signup.jsp").forward(request, response);
+            return;
+        }
+
+        // Validate password strength (at least 8 characters, 1 uppercase, 1 lowercase, 1 digit)
+        if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$")) {
+            request.setAttribute("error", "Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, and a digit.");
+            request.getRequestDispatcher("signup.jsp").forward(request, response);
+            return;
+        }
+        // 6. SET TO DATABASE
+        
+
+        // 7. REDIRECT LOGIC
+        session.setAttribute("username", username);
+        session.setAttribute("user_role", "guest");
+
+        response.sendRedirect("landing.jsp");
+
+        
+        
+
+    }
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet SignUpServlet</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet SignUpServlet at " + request.getContextPath() + "</h1>");
-            out.println("<p>TESTING</p>");
-            out.println("</body>");
-            out.println("</html>");
+        try {
+            processRequest2(request, response);
+        } catch (Exception e){
+            //TODO: add exception handling
         }
     }
 
