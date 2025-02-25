@@ -1,14 +1,15 @@
 package com.mycompany.webapplicationdb.model;
 
-import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
 import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_PASSWORD;
 import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_PORT;
 import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_SERVERHOST;
@@ -38,10 +39,6 @@ public class JDBCModel {
         jdbcUrl = "jdbc:mysql://" + serverHost + ":" + port + "/" + databaseName
                 + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
         conn = renewConnection();
-    }
-
-    public JDBCModel() throws DatabaseConnectionFailedException {
-        this(DATABASE);
     }
 
     // method to renew connection, always use this method in each method
@@ -83,7 +80,7 @@ public class JDBCModel {
                 credentials.put(u, p);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            //TODO: handle query exception
         }
 
         return credentials;
@@ -93,18 +90,53 @@ public class JDBCModel {
     public String getUserRole(String username) throws DatabaseConnectionFailedException {
         conn = renewConnection();
         String role = "";
-        String query = "SELECT user_role FROM account WHERE username = '" + username + "'";
+        String query = "SELECT user_role FROM account WHERE username = ?";
 
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
-
-            while (rs.next()) {
-                role = rs.getString("user_role");
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, username);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    role = rs.getString("user_role");
+                }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            //TODO: handle query exception
         }
 
         return role;
+    }
+
+    // Method to get the list of accounts based on user_role from Connection
+    public Accounts getAccountsByRole(String... userRole) throws DatabaseConnectionFailedException {
+        conn = renewConnection();
+        Accounts accounts = new Accounts();
+        StringBuilder queryBuilder = new StringBuilder("SELECT * FROM account WHERE user_role IN (");
+        for (int i = 0; i < userRole.length; i++) {
+            queryBuilder.append("?");
+            if (i < userRole.length - 1) {
+                queryBuilder.append(",");
+            }
+        }
+        queryBuilder.append(")");
+        String query = queryBuilder.toString();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            for (int i = 0; i < userRole.length; i++) {
+                pstmt.setString(i + 1, userRole[i]);
+            }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    String u = rs.getString("username");
+                    String p = rs.getString("password");
+                    String role = rs.getString("user_role");
+                    accounts.add(new User(u, p, role));
+                }
+            }
+        } catch (SQLException e) {
+            //TODO: handle query exception
+        }
+
+        return accounts;
     }
 
     public static void main(String[] args) {
