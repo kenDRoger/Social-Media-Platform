@@ -58,8 +58,9 @@ public class LoginServlet extends HttpServlet {
             // session obj)
 
         }
+        
         // check if session object has attribute username(if user is already logged in)
-        if (session.getAttribute("username") != null) {
+        if (session.getAttribute("username") == null) {
             try {
                 model = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
                 map = model.getCredentials();
@@ -96,7 +97,7 @@ public class LoginServlet extends HttpServlet {
             request.getRequestDispatcher("landing.jsp").forward(request, response);
             return;
         }
-
+        
         // get list of users
         JDBCModel model2;
         model2 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
@@ -110,9 +111,6 @@ public class LoginServlet extends HttpServlet {
 
         // check if user is admin
         if (userRole.equals("admin")) {
-            // TODO: handle exception(web.xml then add an error page)
-            request.setAttribute("error", "Database connection failed");
-            request.getRequestDispatcher("/error.jsp").forward(request, response);
 
             // forward to admin page
             request.getRequestDispatcher("admin/admin.jsp").forward(request, response);
@@ -132,14 +130,15 @@ public class LoginServlet extends HttpServlet {
 
             // set attribute for admin.jsp
             request.setAttribute("users", admins);
-            // TODO: web.xml then add an error page
-            request.setAttribute("error", "Database connection failed");
-            request.getRequestDispatcher("/error.jsp").forward(request, response);
 
             // forward to admin page
             request.getRequestDispatcher("admin/super_admin.jsp").forward(request, response);
             return;
         }
+        System.out.println("username:"+username);
+        System.out.println("pass:"+password);
+        System.out.println("role:"+userRole);
+        System.out.println("TESTST");
     }
 
     protected void processRequestException(HttpServletRequest request, HttpServletResponse response)
@@ -147,7 +146,7 @@ public class LoginServlet extends HttpServlet {
         try {
             processRequest(request, response);
         } catch (DatabaseConnectionFailedException ex) {
-            request.setAttribute("error", "Database connection failed");
+            request.setAttribute("error", "Database connection failed - processRequestException");
             request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }

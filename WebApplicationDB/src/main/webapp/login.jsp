@@ -5,10 +5,6 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="com.mycompany.webapplicationdb.model.JDBCModel"%>
-<%
-    new JDBCModel();
-%>
 
 <!DOCTYPE html>
 <html>
