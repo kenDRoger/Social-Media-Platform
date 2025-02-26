@@ -85,7 +85,7 @@ public class SignUpServlet extends HttpServlet {
         
         // 6. SET TO DATABASE
         accounts.addUser(new User(username, password, "guest"));
-        //tester
+        //tester TODO: test login of new user
         System.out.println("Created new user");
         
 

@@ -18,13 +18,13 @@ create table post(
 );
 
 create table posts(
-    user_name VARCHAR(30),
+    username VARCHAR(30),
     post1 int,
     post2 int,
     post3 int,
     post4 int,
     post5 int,
-    foreign key (user_name) references account(username),
+    foreign key (username) references account(username),
     foreign key (post1) references post(id),
     foreign key (post2) references post(id),
     foreign key (post3) references post(id),
@@ -33,17 +33,19 @@ create table posts(
 );
 
 create table follows(
-    user_name VARCHAR(30),
+    username VARCHAR(30),
     follow1 VARCHAR(30),
     follow2 VARCHAR(30),
     follow3 VARCHAR(30),
-    foreign key (user_name) references account(username),
+    foreign key (username) references account(username),
     foreign key (follow1) references account(username),
     foreign key (follow2) references account(username),
     foreign key (follow3) references account(username)
 );
 
--- Insert sample values into the account table
+-- Create new table for messages, wait sa email ni sir
+
+
 INSERT INTO account (username, password, user_role) VALUES 
 ('superadmin', 'superpassword', 'super_admin'),
 ('admin1', 'password1', 'admin'),
@@ -56,7 +58,7 @@ INSERT INTO account (username, password, user_role) VALUES
 -- Guest1 is followed by Guest2 and Guest3
 -- Guest2 is followed by Guest1 and Guest3
 -- Guest3 is followed by Guest1 and Guest2
-INSERT INTO follows (user_name, follow1, follow2, follow3) VALUES 
+INSERT INTO follows (username, follow1, follow2, follow3) VALUES 
 ('guest1', 'guest2', 'guest3', null),
 ('guest2', 'guest1', 'guest3', null),
 ('guest3', 'guest1', 'guest2', null);
@@ -66,14 +68,22 @@ INSERT INTO post (title, content) VALUES
 ('First Post - Guest1', 'This is the first post of guest1'),
 ('Second Post - Guest1', 'This is the second post of guest1'),
 ('Third Post - Guest1', 'This is the third post of guest1'),
+('Fourth Post - Guest1', 'This is the fourth post of guest1'),
+('Fifth Post - Guest1', 'This is the fifth post of guest1'),
 ('First Post - Guest2', 'This is the first post of guest2'),
 ('Second Post - Guest2', 'This is the second post of guest2'),
 ('Third Post - Guest2', 'This is the third post of guest2'),
-('First Post - Guest3', 'This is the first post of guest3');
+('Fourth Post - Guest2', 'This is the fourth post of guest2'),
+('Fifth Post - Guest2', 'This is the fifth post of guest2'),
+('First Post - Guest3', 'This is the first post of guest3'),
+('Second Post - Guest3', 'This is the second post of guest3'),
+('Third Post - Guest3', 'This is the third post of guest3'),
+('Fourth Post - Guest3', 'This is the fourth post of guest3'),
+('Fifth Post - Guest3', 'This is the fifth post of guest3');
 
 -- Map the posts to the guests
-INSERT INTO posts (user_name, post1, post2, post3) VALUES 
-('guest1', 1, 2, 3),
-('guest2', 4, 5, null),
-('guest3', 7, null, null);
+INSERT INTO posts (username, post1, post2, post3, post4, post5) VALUES 
+('guest1', 1, 2, 3, 4, 5),
+('guest2', 6, 7, 8, 9, 10),
+('guest3', 11, 12, 13, 14, 15);
 
