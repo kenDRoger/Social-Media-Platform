@@ -62,7 +62,7 @@ public class LoginServlet extends HttpServlet {
         
 
         // 5. SERVLET LOGIC
-        // check if session object has attribute username(if user is already logged in)
+        // check if session object has attribute username(if user is not already logged in)
         if (session.getAttribute("username") == null) {
             // check if username exists
             if (!map.containsKey(username)) {

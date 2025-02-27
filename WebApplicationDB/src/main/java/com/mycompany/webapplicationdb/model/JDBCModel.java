@@ -86,6 +86,28 @@ public class JDBCModel {
         return accounts;
     }
 
+    // method to get the list of Follows from connection
+    public ArrayList<Follows> getFollows() throws DatabaseConnectionFailedException{
+        conn = renewConnection();
+        ArrayList<Follows> following = new ArrayList<>();
+        String query = "SELECT * from follows";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {            
+            while (rs.next()) {
+                String username = rs.getString("username");
+
+                String follow1 = rs.getString("follow1");
+                String follow2 = rs.getString("follow2");
+                String follow3 = rs.getString("follow3");
+
+                following.add(new Follows(username, follow1, follow2, follow3));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error: "+e.getMessage());
+            throw new DatabaseConnectionFailedException();
+        }
+        return following;
+    }
+
     // Method to get the list of accounts from Connection
     public ArrayList<Posts> getPosts() throws DatabaseConnectionFailedException { // for Entry
         conn = renewConnection();
@@ -125,10 +147,12 @@ public class JDBCModel {
                 String content = rs.getString("content");
                 Integer id = rs.getInt("id");
                 Timestamp date_created = rs.getTimestamp("date_created");
-                posts.put(id, new PostData(title, content, date_created).setId(id));
+                String username = rs.getString("username");
+                posts.put(id, new PostData(title, content, date_created, username).setId(id));
             }
 
         } catch (SQLException e) {
+            
             throw new DatabaseConnectionFailedException();
         }
         return posts;
