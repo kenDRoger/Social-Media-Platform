@@ -7,11 +7,13 @@ public class PostData {
     private String content;// 200char
     private int id;
     private Timestamp date_created;
+    private String username;
 
-    public PostData(String title, String content, Timestamp date_created) {
+    public PostData(String title, String content, Timestamp date_created, String username) {
         this.title = title;
         this.content = content;
         this.date_created = date_created;
+        this.username = username;
     }
 
     public String getContent() {
@@ -33,6 +35,10 @@ public class PostData {
 
     public String getTitle() {
         return title;
+    }
+
+    public String getUsername(){
+        return username;
     }
 
     @Override

@@ -14,6 +14,7 @@ import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedExceptio
 public class Posts {
     private String username;
     private PostData[] posts = new PostData[5];
+    private static int newID = getLatestID();
 
     public Posts(String username, PostData post1, PostData post2, PostData post3, PostData post4, PostData post5)
             throws DatabaseConnectionFailedException {
@@ -26,19 +27,23 @@ public class Posts {
     }
 
     // method to get the highest id in the post table database
-    public int getLatestID() throws DatabaseConnectionFailedException {
+    public static int getLatestID() {
         // query in the database in table post for the highest id
         int highestID = 0;
         String query = "SELECT MAX(id) FROM post";
-        JDBCModel model = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
-        try (Statement stmt = model.getConnection().createStatement(); ResultSet rs = stmt.executeQuery(query)) {
+        try {
+            Statement stmt = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE).getConnection().createStatement();
+            ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
                 highestID = rs.getInt(1);
             }
-        } catch (SQLException e) {
-            throw new DatabaseConnectionFailedException();
+        } catch (SQLException | DatabaseConnectionFailedException e) {
+            System.out.println("Error in getLatestID method");
         }
-        return highestID;
+        if(newID > highestID){
+            return newID;
+        }
+        return highestID+1;
     }
 
     public String getColumnNameWithLowestID() throws DatabaseConnectionFailedException {
@@ -63,7 +68,7 @@ public class Posts {
             }
         } catch (SQLException e) {
             // show error message
-            System.out.println("Error-getColumnnamewithlowestid: " + e.getMessage() + " exception:"+e.getClass());
+            System.out.println("Error-getColumnnamewithlowestid: " + e.getMessage() + " exception:" + e.getClass());
             throw new DatabaseConnectionFailedException();
         }
         return "post" + lowestIndex;
@@ -80,7 +85,7 @@ public class Posts {
                 System.out.println("ID:" + post.getId());
             }
         }
-        //tester
+        // tester
         System.out.println("Determined id:" + lowestID);
 
         return lowestID;
@@ -95,23 +100,26 @@ public class Posts {
 
     public void addPost(String title, String content) throws DatabaseConnectionFailedException {
         updatePostOrder();
-        int newID = getLatestID() + 1;
+        
+        //update newstid value
+        newID = getLatestID();
 
         String lowestColumn = getColumnNameWithLowestID();
 
         // add post in post table with the new id and the parameters, title, content,
         // date_created
         JDBCModel model2 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
-        String query3 = "INSERT INTO post (title, content, date_created) VALUES (?, ?, ?)";
+        String query3 = "INSERT INTO post (title, content, date_created, username) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = model2.getConnection().prepareStatement(query3);) {
             stmt.setString(1, title);
             stmt.setString(2, content);
             stmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-            //tester
+            stmt.setString(4, username);
+            // tester
             System.out.println("queryquery3: " + stmt);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error-query3: " + e.getMessage() + " exception:"+e.getClass());
+            System.out.println("Error-query3: " + e.getMessage() + " exception:" + e.getClass());
             throw new DatabaseConnectionFailedException();
         }
 
@@ -122,11 +130,11 @@ public class Posts {
         try (PreparedStatement stmt = model1.getConnection().prepareStatement(query2);) {
             stmt.setInt(1, newID);
             stmt.setString(2, username);
-            //tester
+            // tester
             System.out.println("queryquery2: " + stmt);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error-query2: " + e.getMessage() + " exception:"+e.getClass());
+            System.out.println("Error-query2: " + e.getMessage() + " exception:" + e.getClass());
             throw new DatabaseConnectionFailedException();
         }
 
@@ -136,30 +144,51 @@ public class Posts {
 
         // update the posts array(replace the lowestid with the newest id)
         int lowestIndex = getIndexOfLowestLocalID();
-        //tester
+        // tester
         System.out.println("index:" + lowestIndex);
-        posts[lowestIndex] = new PostData(title, content, new Timestamp(System.currentTimeMillis()));
-        posts[lowestIndex].setId(newID);
+        posts[lowestIndex] = new PostData(title, content, new Timestamp(System.currentTimeMillis()), username);
+        posts[lowestIndex].setId(newID++);
 
         updatePostOrder();
     }
 
     public void deleteFromPostWhereID(int id) throws DatabaseConnectionFailedException {
-        //delete the post in post table
+        // delete the post in post table
         JDBCModel model3 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
         String query4 = "DELETE FROM post WHERE id = ?";
         try (PreparedStatement stmt = model3.getConnection().prepareStatement(query4);) {
             stmt.setInt(1, id);
-            //tester
-            System.out.println("Queryquery4: " + stmt);
+            // tester
+            System.out.println("Querywhereid: " + stmt);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error-query4: " + e.getMessage() + " exception:"+e.getClass());
+            System.out.println("Error-whereid: " + e.getMessage() + " exception:" + e.getClass());
             throw new DatabaseConnectionFailedException();
         }
         // remove post with the given id from the posts array
         for (int i = 0; i < posts.length; i++) {
             if (posts[i] != null && posts[i].getId() == id) {
+                posts[i] = null;
+                break;
+            }
+        }
+    }
+
+    public void deleteFromPostsOfUser() throws DatabaseConnectionFailedException {
+        JDBCModel model3 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+        String query4 = "DELETE FROM post WHERE username = ?";
+        try (PreparedStatement stmt = model3.getConnection().prepareStatement(query4);) {
+            stmt.setString(1, username);
+            // tester
+            System.out.println("Queryofuser: " + stmt);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error-ofuser: " + e.getMessage() + " exception:" + e.getClass());
+            throw new DatabaseConnectionFailedException();
+        }
+        // remove post with the given user from the posts array
+        for (int i = 0; i < posts.length; i++) {
+            if (posts[i] != null && posts[i].getUsername().equals(username)) {
                 posts[i] = null;
                 break;
             }
@@ -183,7 +212,7 @@ public class Posts {
         return lowestIndex;
     }
 
-    public void updatePost(int id,PostData post) throws DatabaseConnectionFailedException {
+    public void updatePost(int id, PostData post) throws DatabaseConnectionFailedException {
         updatePostOrder();
 
         JDBCModel model = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
@@ -192,15 +221,14 @@ public class Posts {
             stmt.setString(1, post.getTitle());
             stmt.setString(2, post.getContent());
             stmt.setInt(3, id);
-            //tester
+            // tester
             System.out.println("Query: " + stmt);
             stmt.executeUpdate();
         } catch (SQLException e) {
-
-            System.out.println("Error-updatepost: " + e.getMessage() + " exception:"+e.getClass());
+            // tester
+            System.out.println("Error-updatepost: " + e.getMessage() + " exception:" + e.getClass());
             throw new DatabaseConnectionFailedException();
         }
-
 
         // update postdataobject here
         for (int i = 0; i < posts.length; i++) {
@@ -211,10 +239,13 @@ public class Posts {
         }
         updatePostOrder();
     }
+    public void deletePost() throws DatabaseConnectionFailedException{
+        
+    }
 
-    public void deletePost(PostData post) throws DatabaseConnectionFailedException {
-        //delete the id of post in posts tablee
-        //get the column name with value id
+    public void deletePost(int id) throws DatabaseConnectionFailedException {
+        // delete the id of post in posts tablee
+        // get the column name with value id
         JDBCModel model3 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
         String query1 = "SELECT post1, post2, post3, post4, post5 FROM posts WHERE username = ?";
 
@@ -223,36 +254,36 @@ public class Posts {
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                if(rs.getInt("post1") == post.getId()){
+                if (rs.getInt("post1") == id) {
                     column = "post1";
-                } else if(rs.getInt("post2") == post.getId()){
+                } else if (rs.getInt("post2") == id) {
                     column = "post2";
-                } else if(rs.getInt("post3") == post.getId()){
+                } else if (rs.getInt("post3") == id) {
                     column = "post3";
-                } else if(rs.getInt("post4") == post.getId()){
+                } else if (rs.getInt("post4") == id) {
                     column = "post4";
-                } else if(rs.getInt("post5") == post.getId()){
+                } else if (rs.getInt("post5") == id) {
                     column = "post5";
                 }
             }
         } catch (SQLException e) {
-            System.out.println("Error-integermaxvalue: " + e.getMessage() + " exception:"+e.getClass());
-            throw new DatabaseConnectionFailedException();
-        }       
-
-        JDBCModel model2 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
-        String query3 = "UPDATE posts SET "+column+" = NULL WHERE username = ?";
-        try (PreparedStatement stmt = model2.getConnection().prepareStatement(query3);) {
-            stmt.setString(1, username);
-            //tester
-            System.out.println("Queryset0: " + stmt);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println("Error-set0: " + e.getMessage() + " exception:"+e.getClass());
+            System.out.println("Error-integermaxvalue: " + e.getMessage() + " exception:" + e.getClass());
             throw new DatabaseConnectionFailedException();
         }
 
-        deleteFromPostWhereID(post.getId());
+        JDBCModel model2 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+        String query3 = "UPDATE posts SET " + column + " = NULL WHERE username = ?";
+        try (PreparedStatement stmt = model2.getConnection().prepareStatement(query3);) {
+            stmt.setString(1, username);
+            // tester
+            System.out.println("Queryset0: " + stmt);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error-set0: " + e.getMessage() + " exception:" + e.getClass());
+            throw new DatabaseConnectionFailedException();
+        }
+
+        deleteFromPostWhereID(id);
     }
 
     public static void main(String[] args) {
@@ -273,7 +304,7 @@ public class Posts {
 
             // Test addPost
             PostData newPost = new PostData("New Post", "This is a new post",
-                    new Timestamp(System.currentTimeMillis()));
+                    new Timestamp(System.currentTimeMillis()), "guest1");
             guest1.addPost("New Post", "This is a new post");
             System.out.println("After adding a new post:");
             // tester
@@ -285,7 +316,8 @@ public class Posts {
 
             // Test updatePost
             newPost = new PostData("Updated Post", "This is an updated post",
-                    new Timestamp(System.currentTimeMillis())).setId(16);//from form data(hidden value siguro)  kapag nagmomodify
+                    new Timestamp(System.currentTimeMillis()), "guest1").setId(16);// from form data(hidden value
+                                                                                   // siguro) kapag nagmomodify
             guest1.updatePost(newPost.getId(), newPost);
             System.out.println("After updating the post:");
             // tester
@@ -296,7 +328,7 @@ public class Posts {
             }
 
             // Test deletePost
-            guest1.deletePost(newPost);
+            guest1.deletePost(newPost.getId());
             System.out.println("After deleting the post:");
             // tester
             System.out.println(
