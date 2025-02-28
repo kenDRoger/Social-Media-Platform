@@ -1,11 +1,11 @@
 package com.mycompany.webapplicationdb.model;
 
-public class User {
+public class Account {
     private String username;
     private String password;
     private String userRole; // Renamed from user_role (Java naming convention)
 
-    public User(String username, String password, String userRole) {
+    public Account(String username, String password, String userRole) {
         this.username = username;
         this.password = password;
         this.userRole = userRole;

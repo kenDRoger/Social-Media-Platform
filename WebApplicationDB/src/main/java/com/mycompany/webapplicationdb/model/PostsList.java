@@ -16,6 +16,18 @@ public class PostsList extends HashMap<String, Posts> {
         return this.get(username);
     }
 
+    //method to check if hashmap contains all null
+    
+    public boolean containsAllNull(){
+        boolean b = true;
+        for(Posts posts : this.values()){
+            if(posts!=null){
+                b =  false;
+            }
+        }
+        return b;
+    }
+
     public static void main(String[] args) {
         try {
             //tester

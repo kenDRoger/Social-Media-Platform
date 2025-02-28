@@ -3,7 +3,6 @@ package com.mycompany.webapplicationdb.model;
 import java.sql.Connection;
 import java.sql.Timestamp;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -69,16 +68,16 @@ public class JDBCModel {
     }
 
     // Method to get the list of accounts from Connection
-    public ArrayList<User> getAccounts() throws DatabaseConnectionFailedException {
+    public ArrayList<Account> getAccounts() throws DatabaseConnectionFailedException {
         conn = renewConnection();
-        ArrayList<User> accounts = new ArrayList<User>();
+        ArrayList<Account> accounts = new ArrayList<Account>();
         String query = "SELECT * FROM account";
         try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
                 String u = rs.getString("username");
                 String p = rs.getString("password");
                 String role = rs.getString("user_role");
-                accounts.add(new User(u, p, role));
+                accounts.add(new Account(u, p, role));
             }
         } catch (SQLException e) {
             throw new DatabaseConnectionFailedException();
@@ -156,6 +155,26 @@ public class JDBCModel {
             throw new DatabaseConnectionFailedException();
         }
         return posts;
+    }
+
+    // method to get the list of messages from connection
+    public ArrayList<Message> getMessages() throws DatabaseConnectionFailedException{
+        conn = renewConnection();
+        ArrayList<Message> messages = new ArrayList<Message>();
+        String query = "SELECT * from messages";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {            
+            while (rs.next()) {
+                String username = rs.getString("username");
+                String subject = rs.getString("subject");
+                String content = rs.getString("content");
+                Timestamp time = rs.getTimestamp("date_created");
+                messages.add(new Message(username, subject, content, time));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error-getMessages: "+e.getMessage());
+            throw new DatabaseConnectionFailedException();
+        }
+        return messages;
     }
 
     // method to get Connection

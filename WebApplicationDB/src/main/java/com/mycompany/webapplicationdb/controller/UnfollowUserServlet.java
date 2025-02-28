@@ -13,49 +13,47 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
-import com.mycompany.webapplicationdb.model.Posts;
-import com.mycompany.webapplicationdb.model.PostsList;
+import com.mycompany.webapplicationdb.exception.NoUserFoundException;
+import com.mycompany.webapplicationdb.model.Following;
+import com.mycompany.webapplicationdb.model.Follows;
 
 /**
  *
  * @author ken
  */
-@WebServlet(name = "DeletePostServlet", urlPatterns = {"/DeletePostServlet"})
-public class DeletePostServlet extends HttpServlet {
+@WebServlet(name = "UnfollowUserServlet", urlPatterns = { "/UnfollowUserServlet" })
+public class UnfollowUserServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     * @throws com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException
+     * @throws ServletException     if a servlet-specific error occurs
+     * @throws IOException          if an I/O error occurs
+     * @throws NoUserFoundException
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseConnectionFailedException {
+            throws ServletException, IOException, DatabaseConnectionFailedException, NoUserFoundException {
         response.setContentType("text/html;charset=UTF-8");
-        //TODO: handle unexcpected access
+        // TODO: handle unexcpected access
 
-        //request parameters
-        int id = Integer.parseInt(request.getParameter("postId"));
-        String currUser = (String) request.getParameter("username");
+        // TODO: handlee null parameteers
 
-        //get all the posts
-        PostsList postsList = new PostsList();
+        // get request parameters
+        String username = request.getParameter("username");
+        String currUser = (String) request.getParameter("currUser");
 
-        //get all posts of currUser
-        Posts posts = postsList.getPostsByUsername(currUser);
-        
-        //delete the post
-        posts.deletePost(id);
-        
-        //TODO: check for null
-        
-        
-        //redirect
-        response.sendRedirect("profile.jsp");
+        // call model
+        Following following = new Following();
+        Follows follows = following.getFollowsByUsername(currUser);
+        follows.removeFollow(username);
+
+        // redirect to users.jsp success unfollow
+        request.setAttribute("successUnfollow", "Successfully unfollowed: " + username);
+        request.getRequestDispatcher("users.jsp").forward(request, response);
+
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -64,18 +62,21 @@ public class DeletePostServlet extends HttpServlet {
         try {
             processRequest2(request, response);
         } catch (DatabaseConnectionFailedException e) {
-            //TODO: handle eexception
+
+        } catch (NoUserFoundException e) {
+            // TODO Auto-generated catch block
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the
+    // + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -86,10 +87,10 @@ public class DeletePostServlet extends HttpServlet {
     /**
      * Handles the HTTP <code>POST</code> method.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

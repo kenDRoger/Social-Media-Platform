@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
-import com.mycompany.webapplicationdb.exception.UnauthorizedAccessException;
 import com.mycompany.webapplicationdb.model.Accounts;
 
 /**
@@ -28,7 +27,7 @@ public class LoginServlet extends HttpServlet {
 
     // New method for processrequest to handle the exceptions
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseConnectionFailedException, UnauthorizedAccessException {
+            throws ServletException, IOException, DatabaseConnectionFailedException {
         response.setContentType("text/html;charset=UTF-8");
         
         
@@ -84,8 +83,8 @@ public class LoginServlet extends HttpServlet {
 
 
         // 6. REDIRECT LOGIC
-        // check if user is guest
-        if (userRole.equals("guest")) {
+        // check if user is user
+        if (userRole.equals("user")) {
             // TODO: set session attribute for landing page
 
 
@@ -108,7 +107,6 @@ public class LoginServlet extends HttpServlet {
 
             // forward to admin page
             response.sendRedirect("admin/admin.jsp");
-            return;
         }
     }
 
@@ -140,21 +138,6 @@ public class LoginServlet extends HttpServlet {
             navigation.put("Contact the web administrator", "mailto:webadmin@localhost");
             request.setAttribute("navigation", navigation);
             request.setAttribute("code", "500");
-            request.getRequestDispatcher("/error.jsp").forward(request, response);
-        } catch (UnauthorizedAccessException ex) {
-            // TODO: Doublee check navigation
-            request.setAttribute("error", "Unauthorized access - LoginServlet");
-            request.setAttribute("title", "Unauthorized Access");
-            request.setAttribute("message", "You do not have authorization to access this page.");
-            request.setAttribute("causes", new String[]{
-                "You are not logged in.",
-                "You do not have permission to access this page."
-            });
-            Map<String, String> navigation = new HashMap<>();
-            navigation.put("Log in", request.getContextPath() + "/login");
-            navigation.put("Contact the web administrator", request.getContextPath() + "/contact");
-            request.setAttribute("navigation", navigation);
-            request.setAttribute("code", "401");
             request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }

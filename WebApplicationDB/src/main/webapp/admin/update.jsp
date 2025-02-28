@@ -1,8 +1,3 @@
-<%-- 
-    Document   : update
-    Created on : Feb 25, 2025, 7:25:14 AM
-    Author     : Vince
---%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>

@@ -17,13 +17,11 @@
             <label>Username: <input type="text" name="username" /></label><br>
             <label>Password: <input type="password" name="password" /></label><br>
             <input type="submit" value="Sign Up" />
+            <c:if test="${not empty error}">
+                <p style="color:red;">${error}</p>
+            </c:if>
             <p>Already a member? <a href="login.jsp">Login</a></p>
-            <%
-                String errorMessage = (String) request.getAttribute("error");
-                if (errorMessage != null && !errorMessage.isEmpty()) {
-            %>
-            <p style="color:red;"><%= errorMessage %></p>
-            <% } %>
+            
         </form>
     </body>
 </html>

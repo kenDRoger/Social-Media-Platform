@@ -16,6 +16,26 @@ public class Posts {
     private PostData[] posts = new PostData[5];
     private static int newID = getLatestID();
 
+    public boolean ifPostsNoNull() {
+        boolean b = true;
+        for (PostData post : posts) {
+            if (post == null) {
+                b = false;
+            }
+        }
+        return b;
+    }
+    
+    public boolean ifPostsNull(){
+        boolean b = true;
+        for (PostData post : posts) {
+            if (post != null) {
+                b = false;
+            }
+        }
+        return b;
+    }
+
     public Posts(String username, PostData post1, PostData post2, PostData post3, PostData post4, PostData post5)
             throws DatabaseConnectionFailedException {
         this.username = username;
@@ -30,7 +50,7 @@ public class Posts {
     public static int getLatestID() {
         // query in the database in table post for the highest id
         int highestID = 0;
-        String query = "SELECT MAX(id) FROM post";
+        String query = "SELECT max(id) from post";
         try {
             Statement stmt = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE).getConnection().createStatement();
             ResultSet rs = stmt.executeQuery(query);
@@ -40,10 +60,11 @@ public class Posts {
         } catch (SQLException | DatabaseConnectionFailedException e) {
             System.out.println("Error in getLatestID method");
         }
-        if(newID > highestID){
+
+        if (newID > highestID) {
             return newID;
         }
-        return highestID+1;
+        return highestID;
     }
 
     public String getColumnNameWithLowestID() throws DatabaseConnectionFailedException {
@@ -59,7 +80,10 @@ public class Posts {
                 // retrieve posts IDs and update local posts array
 
                 for (int i = 1; i <= 5; i++) {
-                    int id = rs.getInt("post" + (i));
+                    if (rs.getObject("post" + (i)) == null) {
+                        return "post" + i;
+                    }
+                    Integer id = rs.getInt("post" + (i));
                     if (id < lowestID) {
                         lowestID = id;
                         lowestIndex = i;
@@ -74,7 +98,7 @@ public class Posts {
         return "post" + lowestIndex;
     }
 
-    public int getLowestLocalID() {
+    public Integer getLowestLocalID() {
         // get the least int in posts id
         int lowestID = Integer.MAX_VALUE;
         for (PostData post : posts) {
@@ -83,6 +107,8 @@ public class Posts {
                     lowestID = post.getId();
                 // tester
                 System.out.println("ID:" + post.getId());
+            } else {
+                return null;
             }
         }
         // tester
@@ -100,11 +126,8 @@ public class Posts {
 
     public void addPost(String title, String content) throws DatabaseConnectionFailedException {
         updatePostOrder();
-        
-        //update newstid value
-        newID = getLatestID();
 
-        String lowestColumn = getColumnNameWithLowestID();
+        // update newstid value
 
         // add post in post table with the new id and the parameters, title, content,
         // date_created
@@ -123,6 +146,9 @@ public class Posts {
             throw new DatabaseConnectionFailedException();
         }
 
+        newID = getLatestID();
+        String lowestColumn = getColumnNameWithLowestID();
+
         // update post5(id) in post table where username = this.username in database(id
         // is autoincremented)
         JDBCModel model1 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
@@ -139,9 +165,10 @@ public class Posts {
         }
 
         // delete the dereferenced post(with an id of getLowestLocalID)
-        int lowestID = getLowestLocalID();
-        deleteFromPostWhereID(lowestID);
-
+        Integer lowestID = getLowestLocalID();
+        if (lowestID != null) {
+            deleteFromPostWhereID(lowestID);
+        }
         // update the posts array(replace the lowestid with the newest id)
         int lowestIndex = getIndexOfLowestLocalID();
         // tester
@@ -239,8 +266,9 @@ public class Posts {
         }
         updatePostOrder();
     }
-    public void deletePost() throws DatabaseConnectionFailedException{
-        
+
+    public void deletePost() throws DatabaseConnectionFailedException {
+
     }
 
     public void deletePost(int id) throws DatabaseConnectionFailedException {
@@ -291,49 +319,49 @@ public class Posts {
         try {
             JDBCModel jdbcModel = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
             ArrayList<Posts> allPosts = jdbcModel.getPosts();
-            Posts guest1 = null;
+            Posts user1 = null;
             // Test getPosts method
             for (Posts posts : allPosts) {
-                if (posts.getUsername().equals("guest1")) {
-                    guest1 = posts;
+                if (posts.getUsername().equals("user1")) {
+                    user1 = posts;
                 }
             }
-            System.out.println(guest1);
+            System.out.println(user1);
             // Assuming addPost, updatePost, and deletePost methods are already correctly
             // implemented
 
             // Test addPost
             PostData newPost = new PostData("New Post", "This is a new post",
-                    new Timestamp(System.currentTimeMillis()), "guest1");
-            guest1.addPost("New Post", "This is a new post");
+                    new Timestamp(System.currentTimeMillis()), "user1");
+            user1.addPost("New Post", "This is a new post");
             System.out.println("After adding a new post:");
             // tester
             System.out.println(
                     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-            for (PostData d : guest1.posts) {
+            for (PostData d : user1.posts) {
                 System.out.println(d);
             }
 
             // Test updatePost
             newPost = new PostData("Updated Post", "This is an updated post",
-                    new Timestamp(System.currentTimeMillis()), "guest1").setId(16);// from form data(hidden value
+                    new Timestamp(System.currentTimeMillis()), "user1").setId(16);// from form data(hidden value
                                                                                    // siguro) kapag nagmomodify
-            guest1.updatePost(newPost.getId(), newPost);
+            user1.updatePost(newPost.getId(), newPost);
             System.out.println("After updating the post:");
             // tester
             System.out.println(
                     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-            for (PostData d : guest1.posts) {
+            for (PostData d : user1.posts) {
                 System.out.println(d);
             }
 
             // Test deletePost
-            guest1.deletePost(newPost.getId());
+            user1.deletePost(newPost.getId());
             System.out.println("After deleting the post:");
             // tester
             System.out.println(
                     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-            for (PostData d : guest1.posts) {
+            for (PostData d : user1.posts) {
                 System.out.println(d);
             }
 
