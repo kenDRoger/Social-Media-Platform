@@ -18,7 +18,7 @@ public class ValueValidation {
     }
 
     public static void validateUserRole(String userRole) throws InvalidUserRoleException{   
-        if(!userRole.equals("admin") && !userRole.equals("super_admin") && !userRole.equals("guest")){
+        if(!userRole.equals("admin") && !userRole.equals("super_admin") && !userRole.equals("user")){
             throw new InvalidUserRoleException();
         }
     }
