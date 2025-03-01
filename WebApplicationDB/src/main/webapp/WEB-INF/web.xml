@@ -21,6 +21,54 @@
         <servlet-name>SignUpServlet</servlet-name>
         <url-pattern>/SignUpServlet</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>DeletePostServlet</servlet-name>
+        <servlet-class>com.mycompany.webapplicationdb.controller.DeletePostServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DeletePostServlet</servlet-name>
+        <url-pattern>/DeletePostServlet</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>FollowUserServlet</servlet-name>
+        <servlet-class>com.mycompany.webapplicationdb.controller.FollowUserServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FollowUserServlet</servlet-name>
+        <url-pattern>/FollowUserServlet</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>com.mycompany.webapplicationdb.controller.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/LogoutServlet</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>SubmitHelpServlet</servlet-name>
+        <servlet-class>com.mycompany.webapplicationdb.controller.SubmitHelpServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SubmitHelpServlet</servlet-name>
+        <url-pattern>/SubmitHelpServlet</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>UnfollowUserServlet</servlet-name>
+        <servlet-class>com.mycompany.webapplicationdb.controller.UnfollowUserServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UnfollowUserServlet</servlet-name>
+        <url-pattern>/UnfollowUserServlet</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>AdminCreateAccountServlet</servlet-name>
+        <servlet-class>com.mycompany.webapplicationdb.controller.AdminCreateAccountServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminCreateAccountServlet</servlet-name>
+        <url-pattern>/AdminCreateAccountServlet</url-pattern>
+    </servlet-mapping>
     <error-page>
         <exception-type>com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException</exception-type>
         <location>/error.jsp</location>

@@ -23,8 +23,8 @@ public class Follows {
 
     public boolean ifFollowsFull() {
         boolean b = true;
-        for (String user : follows) {
-            if (user == null) {
+        for (String account : follows) {
+            if (account == null) {
                 b = false;
             }
         }
@@ -34,8 +34,8 @@ public class Follows {
     // check if follows are empty
     public boolean ifFollowsEmpty() {
         boolean b = true;
-        for (String user : follows) {
-            if (user != null) {
+        for (String account : follows) {
+            if (account != null) {
                 b = false;
             }
         }
@@ -70,11 +70,11 @@ public class Follows {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 for (int i = 1; i <= 3; i++) {
-                    String user = rs.getString("follow" + (i));
-                    if (user == null) {
+                    String account = rs.getString("follow" + (i));
+                    if (account == null) {
                         continue;
                     }
-                    if (user.equals(username)) {
+                    if (account.equals(username)) {
                         column = "follow" + i;
                         break;
                     }
@@ -147,10 +147,10 @@ public class Follows {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 for (int i = 1; i <= 3; i++) {
-                    Object user = rs.getObject("follow" + (i));
+                    Object account = rs.getObject("follow" + (i));
                     // tester
-                    System.out.println("x\nx\nx:" + user);
-                    if (user == null) {
+                    System.out.println("x\nx\nx:" + account);
+                    if (account == null) {
                         column = "follow" + i;
                         break;
                     }

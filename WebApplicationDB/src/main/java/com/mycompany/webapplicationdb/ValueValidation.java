@@ -11,74 +11,137 @@ package com.mycompany.webapplicationdb;
  */
 public class ValueValidation {
 
-    public static void validatePassword(String password) throws InvalidPasswordException{
+    public static void validatePassword(String password) throws InvalidPasswordLengthException, EmptyPasswordException{
+        if(password==null){
+            throw new EmptyPasswordException();
+        }
         if(password.length()>30){
-            throw new InvalidPasswordException();
+            throw new InvalidPasswordLengthException();
         }
     }
 
-    public static void validateUserRole(String userRole) throws InvalidUserRoleException{   
+    public static void validateUserRole(String userRole) throws InvalidUserRoleException, EmptyUserRoleException{
+        if(userRole==null){
+            throw new EmptyUserRoleException();
+        }
         if(!userRole.equals("admin") && !userRole.equals("super_admin") && !userRole.equals("user")){
             throw new InvalidUserRoleException();
         }
     }
 
-    public static void validateFollow(String follow) throws InvalidFollowException{
+    public static void validateFollow(String follow) throws InvalidFollowLengthException, EmptyFollowException{
+        if(follow==null){
+            throw new EmptyFollowException();
+        }
         if(follow.length()>30){
-            throw new InvalidFollowException();
+            throw new InvalidFollowLengthException();
         }
     }
 
-    public static void validateTitle(String title) throws InvalidTitleException{
-        if(title.length()>30 || title==null){
-            throw new InvalidTitleException();
+    public static void validateTitle(String title) throws InvalidTitleLengthException, EmptyTitleException{
+        if(title==null){
+            throw new EmptyTitleException();
+        }
+        if(title.length()>30){
+            throw new InvalidTitleLengthException();
         }
     }
-    public static void validateContent(String content) throws InvalidContentException{
+    public static void validateContent(String content) throws InvalidContentLengthException, EmptyContentException{
+        if(content==null){
+            throw new EmptyContentException();
+        }
         if(content.length()>200){
-            throw new InvalidContentException();
+            throw new InvalidContentLengthException();
         }
     }
     
-    public static void validateUserName(String username) throws InvalidUserNameException{
-        if(username.length()>30){
+    public static void validateUserName(String username) throws InvalidUserNameLengthException, EmptyUserNameException, InvalidUserNameException{
+        if(username==null){
+            throw new EmptyUserNameException();
+        }
+        if (!username.matches("^[a-zA-Z0-9]+$")) {
             throw new InvalidUserNameException();
         }
-    }
-
-    public static class InvalidTitleException extends Exception {
-
-        public InvalidTitleException() {
+        if(username.length()>30){
+            throw new InvalidUserNameLengthException();
         }
     }
 
-    public static class InvalidUserNameException extends Exception {
+    public static class InvalidTitleLengthException extends Exception {
 
-        public InvalidUserNameException() {
+        public InvalidTitleLengthException() {
         }
     }
 
-    public static class InvalidContentException extends Exception {
+    public static class InvalidUserNameLengthException extends Exception {
 
-        public InvalidContentException() {
+        public InvalidUserNameLengthException() {
         }
     }
 
-    public static class InvalidFollowException extends Exception {
+    public static class InvalidContentLengthException extends Exception {
 
-        public InvalidFollowException() {
+        public InvalidContentLengthException() {
         }
     }
 
-    public static class InvalidPasswordException extends Exception {
+    public static class InvalidFollowLengthException extends Exception {
 
-        public InvalidPasswordException() {
+        public InvalidFollowLengthException() {
+        }
+    }
+
+    public static class InvalidPasswordLengthException extends Exception {
+
+        public InvalidPasswordLengthException() {
         }
     }
 
     public static class InvalidUserRoleException extends Exception {
 
         public InvalidUserRoleException() {
+        }
+    }
+
+    public static class EmptyPasswordException extends Exception {
+
+        public EmptyPasswordException() {
+        }
+    }
+
+    public static class EmptyUserRoleException extends Exception {
+
+        public EmptyUserRoleException() {
+        }
+    }
+
+    public static class EmptyFollowException extends Exception {
+
+        public EmptyFollowException() {
+        }
+    }
+
+    public static class EmptyTitleException extends Exception {
+
+        public EmptyTitleException() {
+        }
+    }
+
+    public static class EmptyContentException extends Exception {
+
+        public EmptyContentException() {
+        }
+    }
+
+    public static class EmptyUserNameException extends Exception {
+
+        public EmptyUserNameException() {
+        }
+    }
+
+    public static class InvalidUserNameException extends Exception {
+
+        public InvalidUserNameException() {
         }
     }
     

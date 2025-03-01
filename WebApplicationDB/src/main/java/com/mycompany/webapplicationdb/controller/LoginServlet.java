@@ -31,20 +31,8 @@ public class LoginServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         
         
-
-        // 1. HANDLE UNEXPECTED ACCESS(Session)(for other than login and signup)
-        // check if session object has attribute username
         HttpSession session = request.getSession();
-        /*
-         * 
-         * if (session.getAttribute("username") == null ||
-         * session.getAttribute("username").equals("")) {
-         * // handle unexpected access(siguro check lang if nakalogin as user from
-         * // session obj)
-         * throw new UnauthorizedAccessException();
-         * }
-         */
-
+         
         // 2. GET PARAMETERS
         // get the username and password from the form
         String username = request.getParameter("username");
@@ -80,7 +68,9 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("username", username);
             session.setAttribute("user_role", userRole);
         }
-
+        
+        //Tester
+        System.out.println("RUNNINGGG:"+userRole);
 
         // 6. REDIRECT LOGIC
         // check if user is user
@@ -138,7 +128,7 @@ public class LoginServlet extends HttpServlet {
             navigation.put("Contact the web administrator", "mailto:webadmin@localhost");
             request.setAttribute("navigation", navigation);
             request.setAttribute("code", "500");
-            request.getRequestDispatcher("/error.jsp").forward(request, response);
+            request.getRequestDispatcher("error.jsp").forward(request, response);
         }
     }
 

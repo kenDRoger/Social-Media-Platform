@@ -4,6 +4,7 @@
  */
 package com.mycompany.webapplicationdb.controller;
 
+import com.mycompany.webapplicationdb.ValueValidation;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -16,6 +17,8 @@ import javax.servlet.http.HttpSession;
 import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
 import com.mycompany.webapplicationdb.model.Account;
 import com.mycompany.webapplicationdb.model.Accounts;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @WebServlet(name = "SignUpServlet", urlPatterns = {"/SignUpServlet"})
 public class SignUpServlet extends HttpServlet {
@@ -31,44 +34,19 @@ public class SignUpServlet extends HttpServlet {
      * @throws DatabaseConnectionFailedException 
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseConnectionFailedException {
+            throws ServletException, IOException, DatabaseConnectionFailedException, ValueValidation.InvalidUserNameLengthException, ValueValidation.InvalidPasswordLengthException, ValueValidation.EmptyUserNameException, ValueValidation.InvalidUserNameException, ValueValidation.EmptyPasswordException {
         response.setContentType("text/html;charset=UTF-8");
-        // 1. HANDLE UNEXPECTED ACCESS(Session)(for other than login and signup)
-        HttpSession session = request.getSession();
         
+        HttpSession session = request.getSession();        
 
         // 2. GET PARAMETERS
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-
-        // 3. GET DATABASE DATA
         
-
-        // 4. INITIALIZE MODELS
-
-        // 5. SERVLET LOGIC
-
-        // Validate for empty username or password
-        if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
-            request.setAttribute("error", "Username and password cannot be empty.");
-            request.getRequestDispatcher("signup.jsp").forward(request, response);
-            return;
-        }
-
-        // Check if the username and password length is within varchar(30)
-        if(username.length() > 30 || password.length() > 30) {
-            request.setAttribute("error", "Username and password must be 30 characters or less.");
-            request.getRequestDispatcher("signup.jsp").forward(request, response);
-            return;
-        }
-
-        // Validate for valid username format (alphanumeric only)
-        if (!username.matches("^[a-zA-Z0-9]+$")) {
-            request.setAttribute("error", "Username can only contain alphanumeric characters.");
-            request.getRequestDispatcher("signup.jsp").forward(request, response);
-            return;
-        }
-
+        // Validate for empty username or password   
+        ValueValidation.validateUserName(username);
+        ValueValidation.validatePassword(password);
+        
         Accounts accounts = new Accounts();
         
         // Validate if username is already in database
@@ -77,7 +55,6 @@ public class SignUpServlet extends HttpServlet {
             request.getRequestDispatcher("signup.jsp").forward(request, response);
             return;
         }
-
         
         // 6. SET TO DATABASE
         accounts.addUser(new Account(username, password, "user"));
@@ -99,10 +76,21 @@ public class SignUpServlet extends HttpServlet {
             processRequest2(request, response);
         } catch (DatabaseConnectionFailedException e){
             //TODO: add exception handling
-        } catch (IOException e){
-
-        } catch ( ServletException e){
-
+        } catch (ValueValidation.InvalidUserNameLengthException ex) {
+            request.setAttribute("error", "Username must be 30 characters or less.");
+            request.getRequestDispatcher("signup.jsp").forward(request, response);
+        } catch (ValueValidation.InvalidPasswordLengthException ex) {
+            request.setAttribute("error", "Password must be 30 characters or less.");
+            request.getRequestDispatcher("signup.jsp").forward(request, response);
+        } catch (ValueValidation.EmptyUserNameException ex) {
+            request.setAttribute("error", "Username cannot be empty.");
+            request.getRequestDispatcher("signup.jsp").forward(request, response);
+        } catch (ValueValidation.InvalidUserNameException ex) {
+            request.setAttribute("error", "Username can only contain alphanumeric characters.");
+            request.getRequestDispatcher("signup.jsp").forward(request, response);
+        } catch (ValueValidation.EmptyPasswordException ex) {
+            request.setAttribute("error", "Password cannot be empty.");
+            request.getRequestDispatcher("signup.jsp").forward(request, response);
         } 
     }
 

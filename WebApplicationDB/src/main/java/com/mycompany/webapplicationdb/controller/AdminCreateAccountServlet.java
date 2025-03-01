@@ -39,59 +39,69 @@ public class AdminCreateAccountServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseConnectionFailedException, UnauthorizedAccessException, BadRequestException, ValueValidation.InvalidUserNameException, ValueValidation.InvalidPasswordException, ValueValidation.InvalidUserRoleException {
+            throws ServletException, IOException, DatabaseConnectionFailedException, UnauthorizedAccessException, BadRequestException, ValueValidation.InvalidUserNameLengthException, ValueValidation.InvalidPasswordLengthException, ValueValidation.InvalidUserRoleException, ValueValidation.EmptyUserNameException, ValueValidation.InvalidUserNameException, ValueValidation.EmptyPasswordException, ValueValidation.EmptyUserRoleException {
         response.setContentType("text/html;charset=UTF-8");
-        
-        //TODO: Handle unauthorized access
+        //Handle unauthorized access
         HttpSession session = request.getSession();
         checkAccessAdmin(session);
-        
         //handle invalid parameters
-        String username = (String)request.getParameter("username");
-        String password = (String)request.getParameter("password");
-        String userRole = (String)request.getParameter("user_role");
-        checkIfValidRequests(username,password,userRole);
-        
-        //TODO: Validate input based on sql constraints
+        String username = (String) request.getParameter("username");
+        String password = (String) request.getParameter("password");
+        String userRole = (String) request.getParameter("user_role");
+        checkIfValidRequests(username, password, userRole);
+        //Validate input based on sql constraints
         ValueValidation.validateUserName(username);
         ValueValidation.validatePassword(password);
         ValueValidation.validateUserRole(userRole);
-        
-        //TODO: Create user using 
+
         Accounts accounts = new Accounts();
+        // Validate if username is already in database
+        if (accounts.getUser(username) != null) {
+            request.setAttribute("error", "Username already exists.");
+            request.getRequestDispatcher("admin/create.jsp").forward(request, response);
+            return;
+        }
+
+        //Create user using 
         accounts.addUser(new Account(username, password, userRole));
-        
+
         //redirect
-        response.sendRedirect("admin/admin.jsp");        
+        response.sendRedirect("admin/admin.jsp");
     }
-    
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try{
+        try {
             processRequest2(request, response);
         } catch (DatabaseConnectionFailedException ex) {
             //TODO: DatabaseConnectionFailedException
-            System.out.println("Type of Exception: "+ex.getClass());
+            System.out.println("Type of Exception: " + ex.getClass());
         } catch (UnauthorizedAccessException ex) {
             //TODO: UnauthorizedAccessException
             System.out.println("unauthoized access");
         } catch (BadRequestException ex) {
             //TODO: BadRequestException
             System.out.println("bad request");
-        } catch (ValueValidation.InvalidUserNameException ex) {
-            //TODO: InvalidUserNameException
-            Logger.getLogger(AdminCreateAccountServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ValueValidation.InvalidPasswordException ex) {
-            //TODO: InvalidPasswordException
-            Logger.getLogger(AdminCreateAccountServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ValueValidation.InvalidUserNameLengthException ex) {
+            //TODO: InvalidUserNameLengthException
+            System.out.println("invalid username");
+        } catch (ValueValidation.InvalidPasswordLengthException ex) {
+            //TODO: InvalidPasswordLengthException
+            System.out.println("invalid pass");
         } catch (ValueValidation.InvalidUserRoleException ex) {
             //TODO: InvalidUserRoleException
-            Logger.getLogger(AdminCreateAccountServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } 
+            System.out.println("invalid role");
+        } catch (ValueValidation.EmptyUserNameException ex) {
+            //TODO: EmptyUserNameException
+        } catch (ValueValidation.InvalidUserNameException ex) {
+            //TODO: InvalidUserNameException
+        } catch (ValueValidation.EmptyPasswordException ex) {
+            //TODO: EmptyPasswordException
+        } catch (ValueValidation.EmptyUserRoleException ex) {
+            //TODO: EmptyUserRoleException
+        }
     }
-    
-    
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**

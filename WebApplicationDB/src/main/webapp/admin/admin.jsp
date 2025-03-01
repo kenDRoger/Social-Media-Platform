@@ -16,9 +16,8 @@
     Accounts accounts = new Accounts();
     ArrayList<Account> users = accounts.getAccountsByRole("user");
     ArrayList<Account> admins = accounts.getAccountsByRole("admin");
-    
-    Messages messages = new Messages();
-    
+
+    ArrayList<Message> messages = new Messages().get5LatestMessages();
 
     String userRole = "";
     if (request.getSession(false) != null) {
@@ -26,6 +25,8 @@
     } else {
         //TODO: handle unexpected access
     }
+
+
 %>
 <!DOCTYPE html>
 <html>
@@ -38,6 +39,11 @@
         <nav>
             <ul>
                 <li><a href="admin.jsp">Home</a></li>
+                <div>
+                    <button onclick="window.location.href = 'create.jsp'">Create Account</button>
+                    <button onclick="window.location.href = 'update.jsp'">Update Account</button>
+                    <button onclick="window.location.href = 'delete.jsp'">Delete Account</button>
+                </div>
                 <li><a href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
             </ul>
         </nav>
@@ -45,60 +51,61 @@
 
         <h1>Admin Home Page</h1>
 
-        <%%>
+        <%            if (users == null || users.isEmpty()) {
+        %>
+        <h2>No Users</h2>
+
+        <%} else {%>
         <div class="users-block">
             <h2>List of Users</h2>
             <table border="1">
                 <tr><th>Username</th><th>Role</th></tr>
                         <%
-                            if (users != null) {
-                                for (Account user : users) {
-
+                            for (Account user : users) {
                         %>
                 <tr>
                     <td><%= user.getUsername()%></td>
                     <td><%= user.getUserRole()%></td>
                 </tr>
                 <%
-                        }
+
                     }
                 %>
             </table>
-            <div>
-                <button onclick="window.location.href = 'create.jsp'">Create User</button>
-                <button onclick="window.location.href = 'update.jsp'">Update User</button>
-                <button onclick="window.location.href = 'delete.jsp'">Delete User</button>
-            </div>
+
         </div>
-        <%%>
+        <%}%>
 
 
-        <%if (userRole.equals("super_admin")) {%>
+        <%            if (userRole.equals("super_admin")) {
+                if (admins == null || admins.isEmpty()) {
+        %>
+        <h2>No Admins</h2>
+        <%
+        } else {
+        %>
         <div class="super_admin-block">
             <h2>List of Admins</h2>
             <table border="1">
                 <tr><th>Username</th><th>Role</th></tr>
-                <%
-                    //TODO: wait for instructions about what to put for admin block
-                    for (Account user : admins) {
-                %>
+                        <%                            //TODO: wait for instructions about what to put for admin block
+                            for (Account user : admins) {
+                        %>
                 <tr>
                     <td><%= user.getUsername()%></td>
                     <td><%= user.getUserRole()%></td>
                 </tr>
-                <%
-                    }%>
+                <%}%>
 
             </table>
-            <div>
-                <button onclick="window.location.href = 'create.jsp'">Create User</button>
-                <button onclick="window.location.href = 'update.jsp'">Update User</button>
-                <button onclick="window.location.href = 'delete.jsp'">Delete User</button>
-            </div>
         </div>
-        <%
+        <%}
             }
-        %>
+System.out.println("Messages null:"+messages == null);
+System.out.println("Messages isempty:"+messages.isEmpty());
+            if (messages == null || messages.isEmpty()) {%>
+            <h2>No Messages to Admins</h2>
+            <%}else{%>
         <div class="messages-block">
             <h2>List of Messages to Admins</h2>
             <table border="1">
@@ -110,6 +117,10 @@
                 </tr>
                 <%
                     for (Message message : messages) {
+
+                        if (message != null) {
+
+
                 %>
                 <tr>
                     <td><%= message.getSubject()%></td>
@@ -118,14 +129,15 @@
                     <td>
                         <form action="${pageContext.request.contextPath}/ResolveServlet" method="post">
                             <input type="hidden" name="subject" value="<%= message.getSubject()%>" />
-                            <input type="submit" value="Resolved" />
+                            <input type="submit" value="Resolve" />
                         </form>
                     </td>
                 </tr>
-                <%
+                <%}
                     }%>
             </table>
         </div>
+        <%}%>
 
     </body>
 </html>
