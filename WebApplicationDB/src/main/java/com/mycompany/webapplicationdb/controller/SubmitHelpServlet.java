@@ -57,8 +57,10 @@ public class SubmitHelpServlet extends HttpServlet {
         // parameters
         String subject = (String) request.getParameter("subject");
         String content = (String) request.getParameter("content");
-        checkIfValidRequests(currUser, subject, content);
+        
         ValueValidation.validateContent(content);
+        
+        checkIfValidRequests(currUser, subject, content);
 
         // add to messages
         Messages messages = new Messages();
@@ -74,13 +76,20 @@ public class SubmitHelpServlet extends HttpServlet {
         try {
             processRequest2(request, response);
         } catch (DatabaseOperationException ex) {
-            // TODO: handle exception
-            System.out.println("DatabaseOperationException");
+            ex.setAttributes(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (UnauthorizedAccessException ex) {
             ex.setAttributesForUser(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (BadRequestException e) {
+            e.setAttributes(request.getSession(), request, e);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (InvalidContentLengthException e) {
+            request.setAttribute("error", "Invalid content length");
+            request.getRequestDispatcher("/help.jsp").forward(request, response);
         } catch (EmptyContentException e) {
+            request.setAttribute("error", "Content is empty");
+            request.getRequestDispatcher("/help.jsp").forward(request, response);
         }
     }
 

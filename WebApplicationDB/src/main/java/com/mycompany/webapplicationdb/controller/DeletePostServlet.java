@@ -52,7 +52,6 @@ public class DeletePostServlet extends HttpServlet {
             throws ServletException, IOException, DatabaseOperationException, NoPostFoundException,
             UnauthorizedAccessException, BadRequestException {
         response.setContentType("text/html;charset=UTF-8");
-        // TODO: handle unexcpected access
         HttpSession session = request.getSession();
         checkAccessUser(session);
 
@@ -100,13 +99,17 @@ public class DeletePostServlet extends HttpServlet {
         try {
             processRequest2(request, response);
         } catch (DatabaseOperationException e) {
-            // TODO: handle exception
-            System.out.println("DatabaseOperationException");
+            e.setAttributes(request.getSession(), request, e);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (NoPostFoundException ex) {
-            System.out.println("No post found exception");
+            request.setAttribute("error", ex.getMessage());
+            request.getRequestDispatcher("/profile.jsp").forward(request, response);
         } catch (UnauthorizedAccessException e) {
             e.setAttributesForUser(request.getSession(), request, e);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (BadRequestException e) {
+            e.setAttributes(request.getSession(), request, e);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }
 

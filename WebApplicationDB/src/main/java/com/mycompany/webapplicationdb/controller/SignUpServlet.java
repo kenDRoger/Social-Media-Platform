@@ -56,7 +56,6 @@ public class SignUpServlet extends HttpServlet {
         
         // 6. SET TO DATABASE
         accounts.addAccount(new Account(username, password, "user"));
-        //tester TODO: test login of new user
         System.out.println("Created new user");
         
 
@@ -72,23 +71,24 @@ public class SignUpServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try {
             processRequest2(request, response);
-        } catch (DatabaseOperationException e){
-            //TODO: add exception handling
+        } catch (DatabaseOperationException ex){
+            ex.setAttributes(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (ValueValidation.InvalidUserNameLengthException ex) {
             request.setAttribute("error", "Username must be 30 characters or less.");
-            request.getRequestDispatcher("signup.jsp").forward(request, response);
+            request.getRequestDispatcher("/signup.jsp").forward(request, response);
         } catch (ValueValidation.InvalidPasswordLengthException ex) {
             request.setAttribute("error", "Password must be 30 characters or less.");
-            request.getRequestDispatcher("signup.jsp").forward(request, response);
+            request.getRequestDispatcher("/signup.jsp").forward(request, response);
         } catch (ValueValidation.EmptyUserNameException ex) {
             request.setAttribute("error", "Username cannot be empty.");
-            request.getRequestDispatcher("signup.jsp").forward(request, response);
+            request.getRequestDispatcher("/signup.jsp").forward(request, response);
         } catch (ValueValidation.InvalidUserNameException ex) {
             request.setAttribute("error", "Username can only contain alphanumeric characters.");
-            request.getRequestDispatcher("signup.jsp").forward(request, response);
+            request.getRequestDispatcher("/signup.jsp").forward(request, response);
         } catch (ValueValidation.EmptyPasswordException ex) {
             request.setAttribute("error", "Password cannot be empty.");
-            request.getRequestDispatcher("signup.jsp").forward(request, response);
+            request.getRequestDispatcher("/signup.jsp").forward(request, response);
         } 
     }
 

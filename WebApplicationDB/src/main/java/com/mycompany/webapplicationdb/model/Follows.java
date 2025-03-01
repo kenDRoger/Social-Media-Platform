@@ -47,7 +47,6 @@ public class Follows {
         return b;
     }
 
-    // TODO: method to remove a follower
     public void removeFollow(String username) throws DatabaseOperationException, NoUserFoundException {
 
         // remove in object
@@ -117,7 +116,6 @@ public class Follows {
 
     }
 
-    // TODO: method to add a follower
     public void addFollow(String username) throws DatabaseOperationException, FullFollowsException,
             NoUserFoundException, AlreadyFollowedException {
         // identify if follows are full

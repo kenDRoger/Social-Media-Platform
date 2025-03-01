@@ -65,7 +65,11 @@
             <textarea id="content" name="content" rows="4" required></textarea><br>
 
             <button type="submit">Create Post</button>
+            <c:if test="${not empty error}">
+                <p style="color:red;">${error}</p>
+            </c:if>
         </form>
+        
         <%
             if (!posts.ifPostsNull()) {
                 System.out.println("XXXX:" + postsList);

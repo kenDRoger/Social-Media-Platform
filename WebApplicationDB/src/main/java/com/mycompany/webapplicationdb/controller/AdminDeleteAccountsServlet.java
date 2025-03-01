@@ -67,7 +67,6 @@ public class AdminDeleteAccountsServlet extends HttpServlet {
         }
         accounts.deleteBulkAccounts(accountsParam);
 
-        //TODO: test this
         request.setAttribute("message", "Deleted Accounts");
         request.setAttribute("result", deletingAccounts);
         request.getRequestDispatcher("admin/result.jsp").forward(request, response);
@@ -78,10 +77,14 @@ public class AdminDeleteAccountsServlet extends HttpServlet {
         try{
             processRequest2(request, response);
         } catch (DatabaseOperationException ex) {
-            //TODO: handle exceptions
+            ex.setAttributes(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (UnauthorizedAccessException ex) {
             ex.setAttributesForAdmin(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (BadRequestException ex) {
+            ex.setAttributes(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }
 

@@ -43,6 +43,12 @@
 
             <input type="submit" value="Send Message">
             <!<!-- TODO: Add success Message, redirect from SubmitHelpServlet -->
+            <c:if test="${not empty successMessage}">
+                <p style="color:green;">${successMessage}</p>
+            </c:if>
+            <c:if test="${not empty error}">
+                <p style="color:red;">${error}</p>
+            </c:if>
         </form>
     </body>
 </html>

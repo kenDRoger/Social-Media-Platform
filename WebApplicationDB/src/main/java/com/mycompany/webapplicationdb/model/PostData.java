@@ -51,5 +51,4 @@ public class PostData {
     }
 
     
-    // TODO: wait for email ni sir(idk if post can be modified)
 }

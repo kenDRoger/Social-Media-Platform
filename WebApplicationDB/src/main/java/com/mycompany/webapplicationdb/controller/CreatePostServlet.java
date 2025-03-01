@@ -70,12 +70,12 @@ public class CreatePostServlet extends HttpServlet {
         String currUser = (String) request.getParameter("username");
         String title = (String) request.getParameter("title");
         String content = (String) request.getParameter("content");
-        BadRequestException.checkIfValidRequests(currUser, title, content);
+
         ValueValidation.validateTitle(title);
         ValueValidation.validateContent(content);
 
-        // TODO: double check any null pointers
-
+        BadRequestException.checkIfValidRequests(currUser, title, content);
+        
 
         PostsList postsList = new PostsList();
         Posts posts = postsList.getPostsByUsername(currUser);
@@ -93,15 +93,27 @@ public class CreatePostServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try {
             processRequest2(request, response);
-        } catch (DatabaseOperationException e) {
-            // TODO: handle exceptions
+        } catch (DatabaseOperationException ex) {
+            ex.setAttributes(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (UnauthorizedAccessException ex) {
             ex.setAttributesForUser(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (BadRequestException ex) {
+            ex.setAttributes(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (InvalidTitleLengthException e) {
+            request.setAttribute("error", "Invalid Title Length");
+            request.getRequestDispatcher("/profile.jsp").forward(request, response);
         } catch (EmptyTitleException e) {
+            request.setAttribute("error", "Title cannot be empty");
+            request.getRequestDispatcher("/profile.jsp").forward(request, response);
         } catch (InvalidContentLengthException e) {
+            request.setAttribute("error", "Content length exceeds limit");
+            request.getRequestDispatcher("/profile.jsp").forward(request, response);
         } catch (EmptyContentException e) {
+            request.setAttribute("error", "Content cannot be empty");
+            request.getRequestDispatcher("/profile.jsp").forward(request, response);
         }
     }
 

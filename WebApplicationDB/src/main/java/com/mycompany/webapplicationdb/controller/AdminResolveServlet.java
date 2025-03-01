@@ -58,10 +58,14 @@ public class AdminResolveServlet extends HttpServlet {
         try{
             processRequest2(request, response);
         } catch (UnauthorizedAccessException ex) {
-            //TODO: handle exception
             ex.setAttributesForAdmin(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (BadRequestException ex) {
+            ex.setAttributes(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (DatabaseOperationException ex) {
+            ex.setAttributes(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }
 

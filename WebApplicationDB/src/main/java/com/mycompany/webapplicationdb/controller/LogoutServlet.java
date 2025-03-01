@@ -34,7 +34,6 @@ public class LogoutServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession(false); // Get the session if it exists, avoid creating a new one
         if (session != null) {
-            //TODO: double check any attributes set from other places
             session.setAttribute("username", null);
             session.setAttribute("user_role", null);
             session.invalidate();

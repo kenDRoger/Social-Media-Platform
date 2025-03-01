@@ -75,11 +75,17 @@ public class UnfollowUserServlet extends HttpServlet {
         try {
             processRequest2(request, response);
         } catch (DatabaseOperationException e) {
-            //TODO: handle exception
+            e.setAttributes(request.getSession(), request, e);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (NoUserFoundException e) {
+            request.setAttribute("errorFollow", "No user found");
+            request.getRequestDispatcher("/users.jsp").forward(request, response);
         } catch (UnauthorizedAccessException e) {
             e.setAttributesForUser(request.getSession(), request, e);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (BadRequestException e) {
+            e.setAttributes(request.getSession(), request, e);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }
 

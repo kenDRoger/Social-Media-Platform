@@ -12,7 +12,6 @@ import com.mycompany.webapplicationdb.ValueValidation.InvalidUserNameLengthExcep
 import com.mycompany.webapplicationdb.exception.BadRequestException;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -26,8 +25,6 @@ import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 import com.mycompany.webapplicationdb.model.Account;
 import com.mycompany.webapplicationdb.model.Accounts;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.mycompany.webapplicationdb.ValueValidation.validatePassword;
 import static com.mycompany.webapplicationdb.ValueValidation.validateUserName;
@@ -116,26 +113,26 @@ public class LoginServlet extends HttpServlet {
         try {
             processRequest2(request, response);
         } catch (DatabaseOperationException ex) {
-            // TODO: Double check navigation
-            request.setAttribute("error", "Database connection failed - LoginServlet");
-            request.setAttribute("title", "Database Connection Failed");
-            request.setAttribute("message", "The database connection failed. Please try again later.");
-            request.setAttribute("causes", new String[] {
-                    "The database may be down for maintenance.",
-                    "The database may be experiencing heavy load.",
-                    "There may be a problem with the database connection."
-            });
-            Map<String, String> navigation = new HashMap<>();
-            navigation.put("Try again later", "login.jsp");
-            request.setAttribute("navigation", navigation);
-            request.setAttribute("code", "500");
-            request.getRequestDispatcher("error.jsp").forward(request, response);
+            ex.setAttributes(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (BadRequestException ex) {
+            ex.setAttributes(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (InvalidUserNameLengthException e) {
+            request.setAttribute("error", "Username  should be less than 30 characters.");
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
         } catch (EmptyUserNameException e) {
+            request.setAttribute("error", "Username cannot be empty.");
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
         } catch (InvalidUserNameException e) {
+            request.setAttribute("error", "Username can only contain alphanumeric characters.");
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
         } catch (InvalidPasswordLengthException e) {
+            request.setAttribute("error", "Password should be less than 30 characters.");
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
         } catch (EmptyPasswordException e) {
+            request.setAttribute("error", "Password cannot be empty.");
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
         }
     }
 

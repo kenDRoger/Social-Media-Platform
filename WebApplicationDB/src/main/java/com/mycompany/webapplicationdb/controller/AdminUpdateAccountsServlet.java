@@ -94,24 +94,29 @@ public class AdminUpdateAccountsServlet extends HttpServlet {
         try {
             processRequest2(request, response);
         } catch (DatabaseOperationException ex) {
-            // TODO: handle exceptions
-            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
+            ex.setAttributes(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (UnauthorizedAccessException ex) {
             ex.setAttributesForAdmin(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (ValueValidation.InvalidUserNameLengthException ex) {
-            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ValueValidation.EmptyUserNameException ex) {
-            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ValueValidation.InvalidUserNameException ex) {
-            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
+            request.setAttribute("error", "Invalid username length. Username must be 3-20 characters.");
+            request.getRequestDispatcher("admin/update.jsp").forward(request, response);
+        } catch (ValueValidation.EmptyUserNameException | ValueValidation.InvalidUserNameException ex) {
+            request.setAttribute("error", "Invalid username.");
+            request.getRequestDispatcher("admin/update.jsp").forward(request, response);
         } catch (ValueValidation.InvalidPasswordLengthException ex) {
-            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
+            request.setAttribute("error", "Invalid password length. Password must be 8-100 characters.");
+            request.getRequestDispatcher("admin/update.jsp").forward(request, response);
         } catch (ValueValidation.EmptyPasswordException ex) {
-            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
+            request.setAttribute("error", "Password is empty.");
+            request.getRequestDispatcher("admin/update.jsp").forward(request, response);
         } catch (ValueValidation.InvalidUserRoleException ex) {
-            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
+            request.setAttribute("error", "Invalid user role.");
+            request.getRequestDispatcher("admin/update.jsp").forward(request, response);
         } catch (ValueValidation.EmptyUserRoleException ex) {
-            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
+            request.setAttribute("error", "User role is empty.");
+            request.getRequestDispatcher("admin/update.jsp").forward(request, response);
         }
     }
 

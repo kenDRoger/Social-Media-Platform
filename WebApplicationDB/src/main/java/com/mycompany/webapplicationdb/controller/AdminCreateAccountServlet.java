@@ -26,33 +26,39 @@ import com.mycompany.webapplicationdb.model.Accounts;
  *
  * @author ken
  */
-@WebServlet(name = "AdminCreateUserServlet", urlPatterns = {"/AdminCreateUserServlet"})
+@WebServlet(name = "AdminCreateUserServlet", urlPatterns = { "/AdminCreateUserServlet" })
 public class AdminCreateAccountServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseOperationException, UnauthorizedAccessException, BadRequestException, ValueValidation.InvalidUserNameLengthException, ValueValidation.InvalidPasswordLengthException, ValueValidation.InvalidUserRoleException, ValueValidation.EmptyUserNameException, ValueValidation.InvalidUserNameException, ValueValidation.EmptyPasswordException, ValueValidation.EmptyUserRoleException {
+            throws ServletException, IOException, DatabaseOperationException, UnauthorizedAccessException,
+            ValueValidation.InvalidUserNameLengthException, ValueValidation.InvalidPasswordLengthException,
+            ValueValidation.InvalidUserRoleException, ValueValidation.EmptyUserNameException,
+            ValueValidation.InvalidUserNameException, ValueValidation.EmptyPasswordException,
+            ValueValidation.EmptyUserRoleException, BadRequestException {
         response.setContentType("text/html;charset=UTF-8");
-        //Handle unauthorized access
+        // Handle unauthorized access
         HttpSession session = request.getSession();
         checkAccessAdmin(session);
-        //handle invalid parameters
+        // handle invalid parameters
         String username = (String) request.getParameter("username");
         String password = (String) request.getParameter("password");
         String userRole = (String) request.getParameter("user_role");
-        checkIfValidRequests(username, password, userRole);
-        //Validate input based on sql constraints
+
+        // Validate input based on sql constraints
         ValueValidation.validateUserName(username);
         ValueValidation.validatePassword(password);
         ValueValidation.validateUserRole(userRole);
+
+        checkIfValidRequests(username, password, userRole);
 
         Accounts accounts = new Accounts();
         // Validate if username is already in database
@@ -62,10 +68,10 @@ public class AdminCreateAccountServlet extends HttpServlet {
             return;
         }
 
-        //Create user using 
+        // Create user using
         accounts.addAccount(new Account(username, password, userRole));
 
-        //redirect
+        // redirect
         response.sendRedirect("admin/admin.jsp");
     }
 
@@ -75,33 +81,44 @@ public class AdminCreateAccountServlet extends HttpServlet {
         try {
             processRequest2(request, response);
         } catch (DatabaseOperationException ex) {
-            //TODO: handle exceptions
             ex.setAttributes(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (UnauthorizedAccessException ex) {
             ex.setAttributesForAdmin(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (BadRequestException ex) {
-            System.out.println("bad request");
-        } catch (ValueValidation.InvalidUserNameLengthException ex) {
-            System.out.println("invalid username");
+            ex.setAttributes(request.getSession(), request, ex);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
+        } catch (ValueValidation.InvalidUserNameLengthException | ValueValidation.InvalidUserNameException ex) {
+            request.setAttribute("error", "Username is invalid.");
+            request.getRequestDispatcher("admin/create.jsp").forward(request, response);
         } catch (ValueValidation.InvalidPasswordLengthException ex) {
-            System.out.println("invalid pass");
+            request.setAttribute("error", "Password is invalid.");
+            request.getRequestDispatcher("admin/create.jsp").forward(request, response);
         } catch (ValueValidation.InvalidUserRoleException ex) {
-            System.out.println("invalid role");
+            request.setAttribute("error", "User role is invalid.");
+            request.getRequestDispatcher("admin/create.jsp").forward(request, response);
         } catch (ValueValidation.EmptyUserNameException ex) {
-        } catch (ValueValidation.InvalidUserNameException ex) {
+            request.setAttribute("error", "Username is empty.");
+            request.getRequestDispatcher("admin/create.jsp").forward(request, response);
         } catch (ValueValidation.EmptyPasswordException ex) {
+            request.setAttribute("error", "Password is empty.");
+            request.getRequestDispatcher("admin/create.jsp").forward(request, response);
         } catch (ValueValidation.EmptyUserRoleException ex) {
+            request.setAttribute("error", "User role is empty.");
+            request.getRequestDispatcher("admin/create.jsp").forward(request, response);
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the
+    // + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -112,10 +129,10 @@ public class AdminCreateAccountServlet extends HttpServlet {
     /**
      * Handles the HTTP <code>POST</code> method.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

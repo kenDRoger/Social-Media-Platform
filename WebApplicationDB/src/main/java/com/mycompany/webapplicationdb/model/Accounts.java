@@ -194,7 +194,6 @@ public class Accounts extends ArrayList<Account> {
     }
 
     public void updateAccount(String oldUsername,Account newAccount) throws DatabaseOperationException {
-        //TODO: Test
         /**
          * 1. user to user
          * 2. user to admin
