@@ -75,31 +75,22 @@ public class AdminCreateAccountServlet extends HttpServlet {
         try {
             processRequest2(request, response);
         } catch (DatabaseOperationException ex) {
-            //TODO: DatabaseConnectionFailedException
+            //TODO: handle exceptions
             System.out.println("Type of Exception: " + ex.getClass());
         } catch (UnauthorizedAccessException ex) {
-            //TODO: UnauthorizedAccessException
             System.out.println("unauthoized access");
         } catch (BadRequestException ex) {
-            //TODO: BadRequestException
             System.out.println("bad request");
         } catch (ValueValidation.InvalidUserNameLengthException ex) {
-            //TODO: InvalidUserNameLengthException
             System.out.println("invalid username");
         } catch (ValueValidation.InvalidPasswordLengthException ex) {
-            //TODO: InvalidPasswordLengthException
             System.out.println("invalid pass");
         } catch (ValueValidation.InvalidUserRoleException ex) {
-            //TODO: InvalidUserRoleException
             System.out.println("invalid role");
         } catch (ValueValidation.EmptyUserNameException ex) {
-            //TODO: EmptyUserNameException
         } catch (ValueValidation.InvalidUserNameException ex) {
-            //TODO: InvalidUserNameException
         } catch (ValueValidation.EmptyPasswordException ex) {
-            //TODO: EmptyPasswordException
         } catch (ValueValidation.EmptyUserRoleException ex) {
-            //TODO: EmptyUserRoleException
         }
     }
 

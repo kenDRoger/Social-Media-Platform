@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.mycompany.webapplicationdb.ValueValidation;
 import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 import com.mycompany.webapplicationdb.exception.UnauthorizedAccessException;
 import com.mycompany.webapplicationdb.model.Account;
@@ -38,7 +39,7 @@ public class AdminUpdateAccountsServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseOperationException, UnauthorizedAccessException {
+            throws ServletException, IOException, DatabaseOperationException, UnauthorizedAccessException, ValueValidation.InvalidUserNameLengthException, ValueValidation.EmptyUserNameException, ValueValidation.InvalidUserNameException, ValueValidation.InvalidPasswordLengthException, ValueValidation.EmptyPasswordException, ValueValidation.InvalidUserRoleException, ValueValidation.EmptyUserRoleException {
         response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession();
         UnauthorizedAccessException.checkAccessAdmin(session);
@@ -53,9 +54,10 @@ public class AdminUpdateAccountsServlet extends HttpServlet {
                 String newUsername = request.getParameter("username_" + oldUsername);
                 String newPassword = request.getParameter("password_" + oldUsername);
                 String newUserRole = request.getParameter("user_role_" + oldUsername);
+                ValueValidation.validateUserName(newUsername);
+                ValueValidation.validatePassword(newPassword);
+                ValueValidation.validateUserRole(newUserRole);
                 
-                System.out.println("Values = "+oldUsername+ " and "+newUsername+ " and "+newPassword+" and "+newUserRole);
-
                 // Update the user in the database
                 accounts.updateAccount(oldUsername, new Account(newUsername, newPassword, newUserRole));
             }
@@ -74,6 +76,20 @@ public class AdminUpdateAccountsServlet extends HttpServlet {
             //TODO: handle exceptions
             Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
         } catch (UnauthorizedAccessException ex) {
+            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ValueValidation.InvalidUserNameLengthException ex) {
+            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ValueValidation.EmptyUserNameException ex) {
+            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ValueValidation.InvalidUserNameException ex) {
+            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ValueValidation.InvalidPasswordLengthException ex) {
+            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ValueValidation.EmptyPasswordException ex) {
+            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ValueValidation.InvalidUserRoleException ex) {
+            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ValueValidation.EmptyUserRoleException ex) {
             Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

@@ -5,6 +5,8 @@
 package com.mycompany.webapplicationdb.controller;
 
 import com.mycompany.webapplicationdb.exception.SameUserFoundException;
+import com.mycompany.webapplicationdb.exception.UnauthorizedAccessException;
+
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -12,11 +14,13 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 import com.mycompany.webapplicationdb.exception.FullFollowsException;
 import com.mycompany.webapplicationdb.exception.NoUserFoundException;
 import com.mycompany.webapplicationdb.exception.AlreadyFollowedException;
+import static com.mycompany.webapplicationdb.exception.UnauthorizedAccessException.checkAccessUser;
 import com.mycompany.webapplicationdb.model.Following;
 import com.mycompany.webapplicationdb.model.Follows;
 
@@ -33,23 +37,25 @@ public class FollowUserServlet extends HttpServlet {
      *
      * @param request  servlet request
      * @param response servlet response
-     * @throws ServletException         if a servlet-specific error occurs
-     * @throws IOException              if an I/O error occurs
+     * @throws ServletException            if a servlet-specific error occurs
+     * @throws IOException                 if an I/O error occurs
      * @throws NoUserFoundException
      * @throws FullFollowsException
      * @throws AlreadyFollowedException
+     * @throws UnauthorizedAccessException
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseOperationException, FullFollowsException,
-            NoUserFoundException, SameUserFoundException, AlreadyFollowedException {
+            throws ServletException, IOException, DatabaseOperationException, UnauthorizedAccessException,
+            SameUserFoundException, NoUserFoundException, FullFollowsException, AlreadyFollowedException {
         response.setContentType("text/html;charset=UTF-8");
-        // TODO: handle unexcpected access
-
-        // TODO: handlee null parameteers
+        HttpSession session = request.getSession();
+        checkAccessUser(session);
 
         // get request parameters
         String username = request.getParameter("newUser");
         String currUser = (String) request.getParameter("currUser");
+
+        checkIfValidRequests(username, currUser);
 
         // call model
         Following following = new Following();
@@ -59,14 +65,20 @@ public class FollowUserServlet extends HttpServlet {
         if (!following.ifUsernameExists(username)) {
             throw new NoUserFoundException();
         }
-        // tester
-        System.out.println(following);
         Follows follows = following.getFollowsByUsername(currUser);
+        if (follows == null) {
+            throw new NoUserFoundException();
+        }
         follows.addFollow(username);
 
         // redirect to users.jsp success unfollow
         request.setAttribute("successFollow", "Successfully followed: " + username);
         request.getRequestDispatcher("users.jsp").forward(request, response);
+    }
+
+    private void checkIfValidRequests(String username, String currUser) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'checkIfValidRequests'");
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -76,18 +88,11 @@ public class FollowUserServlet extends HttpServlet {
             processRequest2(request, response);
         } catch (DatabaseOperationException e) {
             // TODO: handle catch
-        } catch (FullFollowsException e) {
-            request.setAttribute("errorFollow", "Full Follows");
-            request.getRequestDispatcher("users.jsp").forward(request, response);
+        } catch (UnauthorizedAccessException e) {
+        } catch (SameUserFoundException e) {
         } catch (NoUserFoundException e) {
-            request.setAttribute("errorFollow", "No User Found");
-            request.getRequestDispatcher("users.jsp").forward(request, response);
-        } catch (SameUserFoundException ex) {
-            request.setAttribute("errorFollow", "Same username");
-            request.getRequestDispatcher("users.jsp").forward(request, response);
+        } catch (FullFollowsException e) {
         } catch (AlreadyFollowedException e) {
-            request.setAttribute("errorFollow", "Already Followed");
-            request.getRequestDispatcher("users.jsp").forward(request, response);
         }
     }
 

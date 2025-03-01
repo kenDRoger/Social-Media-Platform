@@ -41,7 +41,6 @@ public class LogoutServlet extends HttpServlet {
             System.out.println("Session invalidated");
         }
         
-        //TODO: Where to redirect?
         response.sendRedirect(request.getContextPath());
     }
 

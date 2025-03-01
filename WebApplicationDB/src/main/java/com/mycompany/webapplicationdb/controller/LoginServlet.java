@@ -4,7 +4,13 @@
  */
 package com.mycompany.webapplicationdb.controller;
 
+import com.mycompany.webapplicationdb.ValueValidation.EmptyPasswordException;
+import com.mycompany.webapplicationdb.ValueValidation.EmptyUserNameException;
+import com.mycompany.webapplicationdb.ValueValidation.InvalidPasswordLengthException;
+import com.mycompany.webapplicationdb.ValueValidation.InvalidUserNameException;
+import com.mycompany.webapplicationdb.ValueValidation.InvalidUserNameLengthException;
 import com.mycompany.webapplicationdb.exception.BadRequestException;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,19 +25,25 @@ import javax.servlet.http.HttpSession;
 import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 import com.mycompany.webapplicationdb.model.Account;
 import com.mycompany.webapplicationdb.model.Accounts;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.mycompany.webapplicationdb.ValueValidation.validatePassword;
+import static com.mycompany.webapplicationdb.ValueValidation.validateUserName;
 
 /**
  *
  * @author ken
  */
-@WebServlet(name = "LoginServlet", urlPatterns = {"/LoginServlet"})
+@WebServlet(name = "LoginServlet", urlPatterns = { "/LoginServlet" })
 public class LoginServlet extends HttpServlet {
 
     // New method for processrequest to handle the exceptions
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseOperationException, BadRequestException {
+            throws ServletException, IOException, DatabaseOperationException, BadRequestException,
+            InvalidUserNameLengthException, EmptyUserNameException, InvalidUserNameException,
+            InvalidPasswordLengthException, EmptyPasswordException {
         response.setContentType("text/html;charset=UTF-8");
 
         HttpSession session = request.getSession();
@@ -40,18 +52,14 @@ public class LoginServlet extends HttpServlet {
         // get the username and password from the form
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-        BadRequestException.checkIfValidRequests(username,password);
+        BadRequestException.checkIfValidRequests(username, password);
+        validateUserName(username);
+        validatePassword(password);
 
         // 3. GET DATABASE DATA
         // 4. INITIALIZE MODELS
         Accounts accounts = new Accounts();
         Map<String, String> map = accounts.getCredentials();
-
-        //tester
-        System.out.println("username:" + username);
-        System.out.println("accounts:" + accounts);
-
-        ;
 
         // check if username exists
         if (!map.containsKey(username)) {
@@ -72,14 +80,9 @@ public class LoginServlet extends HttpServlet {
         session.setAttribute("username", username);
         session.setAttribute("user_role", userRole);
 
-        //Tester
-        System.out.println("RUNNINGGG:" + userRole);
-
         // 6. REDIRECT LOGIC
         // check if user is user
         if (userRole.equals("user")) {
-            // TODO: set session attribute for landing page
-
             // forward to landing page
             response.sendRedirect("landing.jsp");
             return;
@@ -93,9 +96,6 @@ public class LoginServlet extends HttpServlet {
 
         // check if user is super admin
         if (userRole.equals("super_admin")) {
-            // get list of users
-            // TODO: Additional code for when super admin is confirmed to be able to CRUD
-
             // forward to admin page
             response.sendRedirect("admin/admin.jsp");
             return;
@@ -106,10 +106,10 @@ public class LoginServlet extends HttpServlet {
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -120,10 +120,10 @@ public class LoginServlet extends HttpServlet {
             request.setAttribute("error", "Database connection failed - LoginServlet");
             request.setAttribute("title", "Database Connection Failed");
             request.setAttribute("message", "The database connection failed. Please try again later.");
-            request.setAttribute("causes", new String[]{
-                "The database may be down for maintenance.",
-                "The database may be experiencing heavy load.",
-                "There may be a problem with the database connection."
+            request.setAttribute("causes", new String[] {
+                    "The database may be down for maintenance.",
+                    "The database may be experiencing heavy load.",
+                    "There may be a problem with the database connection."
             });
             Map<String, String> navigation = new HashMap<>();
             navigation.put("Try again later", "login.jsp");
@@ -131,8 +131,11 @@ public class LoginServlet extends HttpServlet {
             request.setAttribute("code", "500");
             request.getRequestDispatcher("error.jsp").forward(request, response);
         } catch (BadRequestException ex) {
-            //TODO: handle exception
-            Logger.getLogger(LoginServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidUserNameLengthException e) {
+        } catch (EmptyUserNameException e) {
+        } catch (InvalidUserNameException e) {
+        } catch (InvalidPasswordLengthException e) {
+        } catch (EmptyPasswordException e) {
         }
     }
 
@@ -141,10 +144,10 @@ public class LoginServlet extends HttpServlet {
     /**
      * Handles the HTTP <code>GET</code> method.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -155,10 +158,10 @@ public class LoginServlet extends HttpServlet {
     /**
      * Handles the HTTP <code>POST</code> method.
      *
-     * @param request servlet request
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

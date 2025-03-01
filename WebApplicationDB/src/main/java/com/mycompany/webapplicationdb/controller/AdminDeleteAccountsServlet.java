@@ -43,7 +43,7 @@ public class AdminDeleteAccountsServlet extends HttpServlet {
         checkAccessAdmin(session);
         
         Object[] accountsParam = request.getParameterValues("accounts");
-        if(accountsParam==null){
+        if(accountsParam==null || accountsParam.length==0){
             request.setAttribute("error", "No selected Accounts");
             request.getRequestDispatcher("admin/delete.jsp").forward(request, response);
         }
