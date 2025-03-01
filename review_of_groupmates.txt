@@ -1,0 +1,10 @@
+Machine Problem 2: Social Media Platform
+WebApplicationDB
+
+Groupmate1: Fajardo, Ken Gabriell
+- Used proper exception handling
+- followed MVC protocol
+- used minimalist styling
+- Implemented all requirements
+- submitted on time
+- implemented more tables for more control/content
