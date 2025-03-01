@@ -1,22 +1,19 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+
 
 <%
     //TODO: handle unexpected access
-    
-
 
     String currUser = (String) session.getAttribute("username");
 %>
-
 
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Help Page</title>
+       <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/styles.css">
     </head>
     <body>
-
         <!-- Navigation Bar -->
         <nav>
             <ul>
@@ -43,3 +40,4 @@
         </form>
     </body>
 </html>
+

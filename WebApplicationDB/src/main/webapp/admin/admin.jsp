@@ -33,17 +33,16 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>Admin Home Page</title>
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/styles.css">
     </head>
     <body>
         <!-- Navigation Bar -->
         <nav>
             <ul>
                 <li><a href="admin.jsp">Home</a></li>
-                <div>
-                    <button onclick="window.location.href = 'create.jsp'">Create Account</button>
-                    <button onclick="window.location.href = 'update.jsp'">Update Account</button>
-                    <button onclick="window.location.href = 'delete.jsp'">Delete Account</button>
-                </div>
+                <li><a href="create.jsp">Create Account</a></li>
+                <li><a href="update.jsp">Update Account</a></li>
+                <li><a href="delete.jsp">Delete Account
                 <li><a href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
             </ul>
         </nav>

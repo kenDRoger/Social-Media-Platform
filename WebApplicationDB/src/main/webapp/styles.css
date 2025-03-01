@@ -1,0 +1,150 @@
+/* Global Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f9f9f9;
+    margin:10px;
+    border-radius: 10px;
+}
+
+/* Navigation Bar */
+nav {
+    background-color: #444;
+    color: #fff;
+    border-radius: 10px;
+}
+
+nav ul {
+    list-style: none;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+nav ul li {
+    display: inline;
+    margin-right: 15px;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    padding: 5px 10px;
+}
+
+nav ul li a:hover {
+    background-color: #555;
+}
+
+/* Main Content */
+h1, h2, h3 {
+    color: #222;
+    margin: 15px 0;
+}
+
+h2 {
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 5px;
+}
+
+.posts, .accounts-block, .users-block, .messages-block, .super_admin-block {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 5px;
+}
+
+.post{
+    background-color: #eee;
+    padding: 20px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+}
+.small{
+    font-style: italic;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+table, th, td {
+    border: 1px solid #ccc;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f1f1f1;
+}
+
+/* Form Styles */
+form {
+    margin: 20px 0;
+}
+
+input[type="text"],
+input[type="password"],
+textarea,
+select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+input[type="submit"],
+button {
+    background-color: #444;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+input[type="submit"]:hover,
+button:hover {
+    background-color: #555;
+}
+input[type="checkbox"]{
+    background-color: #555;
+    transform: scale(2);
+}
+
+/* Responsive Styles */
+@media (max-width: 600px) {
+    nav ul {
+        text-align: center;
+        display: block;
+    }
+    
+    nav ul li {
+        display: block;
+        margin-bottom: 10px;
+    }
+    
+    .posts, .accounts-block, .users-block, .messages-block, .super_admin-block {
+        padding: 15px;
+    }
+    
+    input[type="text"],
+    input[type="password"],
+    select {
+        font-size: 14px;
+    }
+}

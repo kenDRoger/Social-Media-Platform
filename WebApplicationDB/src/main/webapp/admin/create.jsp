@@ -5,8 +5,19 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Create Account</title>
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/styles.css">
     </head>
     <body>
+        <!-- Navigation Bar -->
+        <nav>
+            <ul>
+                <li><a href="admin.jsp">Home</a></li>
+                <li><a href="create.jsp">Create Account</a></li>
+                <li><a href="update.jsp">Update Account</a></li>
+                <li><a href="delete.jsp">Delete Account
+                <li><a href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
+            </ul>
+        </nav>
         <h1>Create a New Account</h1>
 
         <%
@@ -46,7 +57,5 @@
             </c:if>
         </form>
 
-        <br>
-        <a href="admin.jsp">Back to Admin Page</a>
     </body>
 </html>

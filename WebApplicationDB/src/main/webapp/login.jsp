@@ -11,6 +11,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Login Page</title>
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/styles.css">
     </head>
     <body>
         <h1>Login</h1>
@@ -21,6 +22,7 @@
             <c:if test="${not empty error}">
                 <p style="color:red;">${error}</p>
             </c:if>
+            <br>
             <p><a href="signup.jsp">Sign Up</a></p>
         </form>
     </body>

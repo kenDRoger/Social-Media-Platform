@@ -11,6 +11,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Error Page</title>
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/styles.css">
     </head>
     <body>
         <header>
@@ -45,6 +46,12 @@
                         %>
                     </ul>
                 </p>
+                <% } %>
+                <%
+                    if (request.getAttribute("exception") != null) {
+                %>
+                <h1><strong>Exception:</strong> ${requestScope.exception.class.name}</h1>
+                <p><strong>Exception Message:</strong> ${requestScope.exception.message}</p>
                 <% } %>
             </section>
         </main>

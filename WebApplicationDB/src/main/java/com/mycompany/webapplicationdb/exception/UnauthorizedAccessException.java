@@ -9,7 +9,7 @@ public class UnauthorizedAccessException extends Exception{
         Object b = session.getAttribute("username");
         Object a = session.getAttribute("user_role");
         if (b == null || a == null) {
-            throw new UnauthorizedAccessException();
+            throw new UnauthorizedAccessException("You are not authorized to access this page because you are not logged in.");
         }
         
         if (((String)a).equals("admin")) {
@@ -19,7 +19,7 @@ public class UnauthorizedAccessException extends Exception{
             return ;
         }
 
-        throw new UnauthorizedAccessException();
+        throw new UnauthorizedAccessException("You are not authorized to access this page because you are not an admin.");
     }
 
     public static void checkAccessUser(HttpSession session) throws UnauthorizedAccessException{
@@ -27,13 +27,17 @@ public class UnauthorizedAccessException extends Exception{
         Object b = session.getAttribute("username");
         Object a = session.getAttribute("user_role");
         if (b == null || a == null) {
-            throw new UnauthorizedAccessException();
+            throw new UnauthorizedAccessException("You are not authorized to access this page because you are not logged in.");
         }
         
         if (((String)a).equals("user")) {
             return;
         }
 
-        throw new UnauthorizedAccessException();
+        throw new UnauthorizedAccessException("You are not authorized to access this page because you are not a user.");
     }
+    public UnauthorizedAccessException(String error) {
+        super(error);
+    }
+    
 }

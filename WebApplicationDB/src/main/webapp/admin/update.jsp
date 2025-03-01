@@ -28,9 +28,20 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+        <title>Update Page</title>
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/styles.css">
     </head>
     <body>
+        <!-- Navigation Bar -->
+        <nav>
+            <ul>
+                <li><a href="admin.jsp">Home</a></li>
+                <li><a href="create.jsp">Create Account</a></li>
+                <li><a href="update.jsp">Update Account</a></li>
+                <li><a href="delete.jsp">Delete Account
+                <li><a href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
+            </ul>
+        </nav>
         <h1>Update Accounts</h1>
         <%            if (users == null || users.isEmpty()) {
         %>
@@ -51,7 +62,7 @@
                         <td><%= user.getUserRole()%></td>
                         <!-- TODO: Double check -->
                         <td><input type="text" name="username_<%= user.getUsername()%>" value="<%= user.getUsername()%>"></td>
-                        <td><input type="password" name="password_<%= user.getUsername()%>"></td>
+                        <td><input type="password" name="password_<%= user.getUsername()%>" value="<%= user.getPassword()%>"></td>
                         <td>
                             <select name="user_role_<%= user.getUsername()%>" required>
                                 <option value="user"selected>User</option>
@@ -79,7 +90,7 @@
                         <td><%= user.getPassword()%></td>
                         <td><%= user.getUserRole()%></td>
                         <td><input type="text" name="username_<%= user.getUsername()%>" value="<%= user.getUsername()%>"></td>
-                        <td><input type="password" name="password_<%= user.getUsername()%>"></td>
+                        <td><input type="password" name="password_<%= user.getUsername()%>" value="<%= user.getPassword()%>"></td>
                         <td>
                             <select name="user_role_<%= user.getUsername()%>" required>
                                 <option value="admin"selected>Admin</option>
@@ -100,7 +111,5 @@
         </form>
         <%}%>
 
-        <br>
-        <a href="admin.jsp">Back to Admin Page</a>
     </body>
 </html>
