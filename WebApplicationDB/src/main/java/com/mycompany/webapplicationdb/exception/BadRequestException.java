@@ -4,7 +4,6 @@
  */
 package com.mycompany.webapplicationdb.exception;
 
-
 /**
  *
  * @author ken
@@ -19,14 +18,18 @@ public class BadRequestException extends Exception {
      * @throws com.mycompany.webapplicationdb.exception.BadRequestException
      */
     public static void checkIfValidRequests(Object... nonnull) throws BadRequestException {
+        if (nonnull == null) {
+            throw new BadRequestException("Request has Empty Parameters");
+        }
+
         for (Object obj : nonnull) {
-            if (obj == null) {
+            if (obj == null || obj.toString().isEmpty()) {
                 throw new BadRequestException("Request invalid");
             }
         }
     }
-    
-    public BadRequestException(String message){
+
+    public BadRequestException(String message) {
         super(message);
     }
 }

@@ -3,11 +3,11 @@ package com.mycompany.webapplicationdb.model;
 import java.sql.Timestamp;
 
 public class PostData {
-    private String title;// 30
-    private String content;// 200char
+    private final String title;// 30
+    private final String content;// 200char
     private int id;
-    private Timestamp date_created;
-    private String username;
+    private final Timestamp date_created;
+    private final String username;
 
     public PostData(String title, String content, Timestamp date_created, String username) {
         this.title = title;

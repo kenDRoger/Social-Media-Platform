@@ -339,7 +339,8 @@ public class Posts {
                     throw new NoPostFoundException(
                             "No post with id " + id + " found in posts table of user " + username);
                 }
-                try(PreparedStatement stmt2 = model.getConnection().prepareStatement(String.format(updateQuery, column));){
+                try (PreparedStatement stmt2 = model.getConnection()
+                        .prepareStatement(String.format(updateQuery, column));) {
                     stmt2.setString(1, username);
                     // tester
                     System.out.println("Query: " + stmt2);
@@ -358,54 +359,54 @@ public class Posts {
     }
 
     public static void main(String[] args) {
-        //Tester
+        // Tester
         try {
-            JDBCModel jdbcModel = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
-            ArrayList<Posts> allPosts = jdbcModel.getPosts();
-            Posts user1 = null;
-            // Test getPosts method
-            for (Posts posts : allPosts) {
-                if (posts.getUsername().equals("user1")) {
-                    user1 = posts;
+            try (JDBCModel jdbcModel = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE)) {
+                ArrayList<Posts> allPosts = jdbcModel.getPosts();
+                Posts user1 = null;
+                // Test getPosts method
+                for (Posts posts : allPosts) {
+                    if (posts.getUsername().equals("user1")) {
+                        user1 = posts;
+                    }
                 }
-            }
-            System.out.println(user1);
-            // Assuming addPost, updatePost, and deletePost methods are already correctly
-            // implemented
+                System.out.println(user1);
+                // Assuming addPost, updatePost, and deletePost methods are already correctly
+                // implemented
 
-            // Test addPost
-            PostData newPost = new PostData("New Post", "This is a new post",
-                    new Timestamp(System.currentTimeMillis()), "user1");
-            user1.addPost("New Post", "This is a new post");
-            System.out.println("After adding a new post:");
-            // tester
-            System.out.println(
-                    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-            for (PostData d : user1.posts) {
-                System.out.println(d);
-            }
+                // Test addPost
+                if (user1 != null)
+                    user1.addPost("New Post", "This is a new post");
+                System.out.println("After adding a new post:");
+                // tester
+                System.out.println(
+                        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+                for (PostData d : user1.posts) {
+                    System.out.println(d);
+                }
 
-            // Test updatePost
-            newPost = new PostData("Updated Post", "This is an updated post",
-                    new Timestamp(System.currentTimeMillis()), "user1").setId(16);// from form data(hidden value
-            // siguro) kapag nagmomodify
-            user1.updatePost(newPost.getId(), newPost);
-            System.out.println("After updating the post:");
-            // tester
-            System.out.println(
-                    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-            for (PostData d : user1.posts) {
-                System.out.println(d);
-            }
+                // Test updatePost
+                PostData newPost = new PostData("Updated Post", "This is an updated post",
+                        new Timestamp(System.currentTimeMillis()), "user1").setId(16);// from form data(hidden value
+                // siguro) kapag nagmomodify
+                user1.updatePost(newPost.getId(), newPost);
+                System.out.println("After updating the post:");
+                // tester
+                System.out.println(
+                        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+                for (PostData d : user1.posts) {
+                    System.out.println(d);
+                }
 
-            // Test deletePost
-            user1.deletePost(newPost.getId());
-            System.out.println("After deleting the post:");
-            // tester
-            System.out.println(
-                    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-            for (PostData d : user1.posts) {
-                System.out.println(d);
+                // Test deletePost
+                user1.deletePost(newPost.getId());
+                System.out.println("After deleting the post:");
+                // tester
+                System.out.println(
+                        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+                for (PostData d : user1.posts) {
+                    System.out.println(d);
+                }
             }
 
         } catch (SQLException ex) {
@@ -413,7 +414,6 @@ public class Posts {
         } catch (DatabaseOperationException ex) {
             Logger.getLogger(Posts.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoPostFoundException e) {
-            e.printStackTrace();
         }
 
     }

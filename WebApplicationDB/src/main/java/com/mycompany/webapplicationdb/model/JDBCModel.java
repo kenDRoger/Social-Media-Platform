@@ -1,20 +1,19 @@
 package com.mycompany.webapplicationdb.model;
 
 import java.sql.Connection;
-import java.sql.Timestamp;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_PASSWORD;
 import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_PORT;
 import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_SERVERHOST;
 import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_USERNAME;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class JDBCModel implements AutoCloseable {
 
@@ -65,7 +64,7 @@ public class JDBCModel implements AutoCloseable {
     // Method to get the list of accounts from Connection
     public ArrayList<Account> getAccounts() throws DatabaseOperationException {
         
-        ArrayList<Account> accounts = new ArrayList<Account>();
+        ArrayList<Account> accounts = new ArrayList<>();
         String query = "SELECT * FROM account";
         try ( Statement stmt = renewConnection().createStatement();  ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
@@ -103,7 +102,7 @@ public class JDBCModel implements AutoCloseable {
 
     // Method to get the list of accounts from Connection
     public ArrayList<Posts> getPosts() throws DatabaseOperationException { // for Entry
-        ArrayList<Posts> entry = new ArrayList<Posts>();
+        ArrayList<Posts> entry = new ArrayList<>();
         HashMap<Integer, PostData> posts = getPost();
         String query = "SELECT * from posts";
         try ( Statement stmt = renewConnection().createStatement();  ResultSet rs = stmt.executeQuery(query)) {
@@ -129,7 +128,7 @@ public class JDBCModel implements AutoCloseable {
     // method to get the list of post from Connection
     public HashMap<Integer, PostData> getPost() throws DatabaseOperationException {// helper method only for
         // getPosts
-        HashMap<Integer, PostData> posts = new HashMap<Integer, PostData>();
+        HashMap<Integer, PostData> posts = new HashMap<>();
         String query = "SELECT * FROM post";
         try ( Statement stmt = renewConnection().createStatement();  ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
@@ -174,10 +173,7 @@ public class JDBCModel implements AutoCloseable {
     }
 
     public static void main(String[] args) {
-        try {
-            new JDBCModel("mp2");
-        } catch (SQLException ex) {
-        }
+        
     }
 
     @Override

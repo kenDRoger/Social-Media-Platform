@@ -13,21 +13,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.mycompany.webapplicationdb.ValueValidation;
 import com.mycompany.webapplicationdb.exception.BadRequestException;
-import static com.mycompany.webapplicationdb.exception.BadRequestException.checkIfValidRequests;
 import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 import com.mycompany.webapplicationdb.exception.UnauthorizedAccessException;
 import static com.mycompany.webapplicationdb.exception.UnauthorizedAccessException.checkAccessAdmin;
-import com.mycompany.webapplicationdb.model.Account;
 import com.mycompany.webapplicationdb.model.Accounts;
 
 /**
  *
  * @author ken
  */
-@WebServlet(name = "AdminCreateUserServlet", urlPatterns = {"/AdminCreateUserServlet"})
-public class AdminCreateAccountServlet extends HttpServlet {
+@WebServlet(name = "DeleteAccountsServlet", urlPatterns = {"/DeleteAccountsServlet"})
+public class AdminDeleteAccountsServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -39,67 +36,39 @@ public class AdminCreateAccountServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseOperationException, UnauthorizedAccessException, BadRequestException, ValueValidation.InvalidUserNameLengthException, ValueValidation.InvalidPasswordLengthException, ValueValidation.InvalidUserRoleException, ValueValidation.EmptyUserNameException, ValueValidation.InvalidUserNameException, ValueValidation.EmptyPasswordException, ValueValidation.EmptyUserRoleException {
+            throws ServletException, IOException, DatabaseOperationException, UnauthorizedAccessException, BadRequestException {
         response.setContentType("text/html;charset=UTF-8");
-        //Handle unauthorized access
+        //TODO: handle unexpected access
         HttpSession session = request.getSession();
         checkAccessAdmin(session);
-        //handle invalid parameters
-        String username = (String) request.getParameter("username");
-        String password = (String) request.getParameter("password");
-        String userRole = (String) request.getParameter("user_role");
-        checkIfValidRequests(username, password, userRole);
-        //Validate input based on sql constraints
-        ValueValidation.validateUserName(username);
-        ValueValidation.validatePassword(password);
-        ValueValidation.validateUserRole(userRole);
-
-        Accounts accounts = new Accounts();
-        // Validate if username is already in database
-        if (accounts.getUser(username) != null) {
-            request.setAttribute("error", "Username already exists.");
-            request.getRequestDispatcher("admin/create.jsp").forward(request, response);
-            return;
+        
+        Object[] accountsParam = request.getParameterValues("accounts");
+        if(accountsParam==null){
+            request.setAttribute("error", "No selected Accounts");
+            request.getRequestDispatcher("admin/delete.jsp").forward(request, response);
         }
+        BadRequestException.checkIfValidRequests(accountsParam);
+        
+        Accounts accounts = new Accounts();
+        accounts.deleteBulkAccounts(accountsParam);
 
-        //Create user using 
-        accounts.addAccount(new Account(username, password, userRole));
-
+        //TODO: handle valid parameters
+        
+        
         //redirect
         response.sendRedirect("admin/admin.jsp");
     }
-
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try {
+        try{
             processRequest2(request, response);
         } catch (DatabaseOperationException ex) {
-            //TODO: DatabaseConnectionFailedException
-            System.out.println("Type of Exception: " + ex.getClass());
+            //TODO: handle exceptions
+            
+            
         } catch (UnauthorizedAccessException ex) {
-            //TODO: UnauthorizedAccessException
-            System.out.println("unauthoized access");
         } catch (BadRequestException ex) {
-            //TODO: BadRequestException
-            System.out.println("bad request");
-        } catch (ValueValidation.InvalidUserNameLengthException ex) {
-            //TODO: InvalidUserNameLengthException
-            System.out.println("invalid username");
-        } catch (ValueValidation.InvalidPasswordLengthException ex) {
-            //TODO: InvalidPasswordLengthException
-            System.out.println("invalid pass");
-        } catch (ValueValidation.InvalidUserRoleException ex) {
-            //TODO: InvalidUserRoleException
-            System.out.println("invalid role");
-        } catch (ValueValidation.EmptyUserNameException ex) {
-            //TODO: EmptyUserNameException
-        } catch (ValueValidation.InvalidUserNameException ex) {
-            //TODO: InvalidUserNameException
-        } catch (ValueValidation.EmptyPasswordException ex) {
-            //TODO: EmptyPasswordException
-        } catch (ValueValidation.EmptyUserRoleException ex) {
-            //TODO: EmptyUserRoleException
         }
     }
 

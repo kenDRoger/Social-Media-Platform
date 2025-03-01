@@ -40,16 +40,19 @@ public class Following extends ArrayList<Follows> {
 
     public static void main(String[] args) {
         try {
-            JDBCModel jdbcModel = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
             //tester
-            System.out.println("Successful jdbcmodel");
-            for (Follows posts : jdbcModel.getFollows()) {
-                System.out.println(posts);
+            try (JDBCModel jdbcModel = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE)) {
+                //tester
+                System.out.println("Successful jdbcmodel");
+                for (Follows posts : jdbcModel.getFollows()) {
+                    System.out.println(posts);
+                }
             }
         } catch (SQLException ex) {
             System.out.println("Failed");
         } catch (DatabaseOperationException ex) {
             Logger.getLogger(Following.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
     }
 }

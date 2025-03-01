@@ -15,8 +15,8 @@
     <body>
         <h1>Login</h1>
         <form action="LoginServlet" method="post">
-            <label>Username: <input type="text" name="username" /></label>
-            <label>Password: <input type="password" name="password" /></label>
+            <label>Username: <input type="text" name="username" required/></label>
+            <label>Password: <input type="password" name="password" required/></label>
             <input type="submit" value="Login" />
             <c:if test="${not empty error}">
                 <p style="color:red;">${error}</p>

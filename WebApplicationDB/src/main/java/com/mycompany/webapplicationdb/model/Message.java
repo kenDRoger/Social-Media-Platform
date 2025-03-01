@@ -4,10 +4,10 @@ package com.mycompany.webapplicationdb.model;
 import java.sql.Timestamp;
 
 public class Message {
-    private String username;
-    private String subject;
-    private String content;
-    private Timestamp date_created;
+    private final String username;
+    private final String subject;
+    private final String content;
+    private final Timestamp date_created;
 
     public Message(String username, String subject, String content, Timestamp date_created){
         this.username = username;

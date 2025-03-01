@@ -40,7 +40,6 @@ public class LoginServlet extends HttpServlet {
         // get the username and password from the form
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-        //check if null
         BadRequestException.checkIfValidRequests(username,password);
 
         // 3. GET DATABASE DATA

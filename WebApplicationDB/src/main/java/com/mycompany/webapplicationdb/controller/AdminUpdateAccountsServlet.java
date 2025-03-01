@@ -4,25 +4,28 @@
  */
 package com.mycompany.webapplicationdb.controller;
 
+import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
+import com.mycompany.webapplicationdb.exception.UnauthorizedAccessException;
+import com.mycompany.webapplicationdb.model.Account;
+import com.mycompany.webapplicationdb.model.Accounts;
 import java.io.IOException;
-
+import java.io.PrintWriter;
+import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
-import com.mycompany.webapplicationdb.exception.NoPostFoundException;
-import com.mycompany.webapplicationdb.model.Posts;
-import com.mycompany.webapplicationdb.model.PostsList;
+import javax.servlet.http.HttpSession;
 
 /**
  *
  * @author ken
  */
-@WebServlet(name = "DeletePostServlet", urlPatterns = {"/DeletePostServlet"})
-public class DeletePostServlet extends HttpServlet {
+@WebServlet(name = "AdminUpdateAccountsServlet", urlPatterns = {"/AdminUpdateAccountsServlet"})
+public class AdminUpdateAccountsServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -32,31 +35,33 @@ public class DeletePostServlet extends HttpServlet {
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
-     * @throws com.mycompany.webapplicationdb.exception.DatabaseOperationException
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseOperationException, NoPostFoundException {
+            throws ServletException, IOException, DatabaseOperationException, UnauthorizedAccessException {
         response.setContentType("text/html;charset=UTF-8");
-        //TODO: handle unexcpected access
+        HttpSession session = request.getSession();
+        UnauthorizedAccessException.checkAccessAdmin(session);
 
-        //request parameters
-        int id = Integer.parseInt(request.getParameter("postId"));
-        String currUser = (String) request.getParameter("username");
+        Accounts accounts = new Accounts();
+        //get parameters
+        Enumeration<String> paramNames = request.getParameterNames();
+        while (paramNames.hasMoreElements()) {
+            String paramName = paramNames.nextElement();
+            if (paramName.startsWith("username_")) {
+                String oldUsername = paramName.substring(9); // Extract original username
+                String newUsername = request.getParameter("username_" + oldUsername);
+                String newPassword = request.getParameter("password_" + oldUsername);
+                String newUserRole = request.getParameter("user_role_" + oldUsername);
+                
+                System.out.println("Values = "+oldUsername+ " and "+newUsername+ " and "+newPassword+" and "+newUserRole);
 
-        //get all the posts
-        PostsList postsList = new PostsList();
-
-        //get all posts of currUser
-        Posts posts = postsList.getPostsByUsername(currUser);
+                // Update the user in the database
+                accounts.updateAccount(oldUsername, new Account(newUsername, newPassword, newUserRole));
+            }
+        }
         
-        //delete the post
-        posts.deletePost(id);
-        
-        //TODO: check for null
-        
-        
-        //redirect
-        response.sendRedirect("profile.jsp");
+        //TODO: change this? look at issue
+        response.sendRedirect("admin/update.jsp");
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -64,11 +69,11 @@ public class DeletePostServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try {
             processRequest2(request, response);
-        } catch (DatabaseOperationException e) {
-            //TODO: handle eexception
-            System.out.println("DatabaseOperationException");
-        } catch (NoPostFoundException ex) {
-            System.out.println("No post found exception");
+        } catch (DatabaseOperationException ex) {
+            //TODO: handle exceptions
+            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnauthorizedAccessException ex) {
+            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

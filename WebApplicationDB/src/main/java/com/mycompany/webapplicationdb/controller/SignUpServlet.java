@@ -4,7 +4,6 @@
  */
 package com.mycompany.webapplicationdb.controller;
 
-import com.mycompany.webapplicationdb.ValueValidation;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -14,11 +13,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.mycompany.webapplicationdb.ValueValidation;
 import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 import com.mycompany.webapplicationdb.model.Account;
 import com.mycompany.webapplicationdb.model.Accounts;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @WebServlet(name = "SignUpServlet", urlPatterns = {"/SignUpServlet"})
 public class SignUpServlet extends HttpServlet {
@@ -57,7 +55,7 @@ public class SignUpServlet extends HttpServlet {
         }
         
         // 6. SET TO DATABASE
-        accounts.addUser(new Account(username, password, "user"));
+        accounts.addAccount(new Account(username, password, "user"));
         //tester TODO: test login of new user
         System.out.println("Created new user");
         

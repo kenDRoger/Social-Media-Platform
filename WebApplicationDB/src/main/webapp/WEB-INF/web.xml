@@ -69,6 +69,14 @@
         <servlet-name>AdminCreateAccountServlet</servlet-name>
         <url-pattern>/AdminCreateAccountServlet</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>AdminDeleteAccountsServlet</servlet-name>
+        <servlet-class>com.mycompany.webapplicationdb.controller.AdminDeleteAccountsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminDeleteAccountsServlet</servlet-name>
+        <url-pattern>/AdminDeleteAccountsServlet</url-pattern>
+    </servlet-mapping>
     <error-page>
         <exception-type>com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException</exception-type>
         <location>/error.jsp</location>
