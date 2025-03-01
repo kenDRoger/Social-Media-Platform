@@ -1,18 +1,26 @@
 package com.mycompany.webapplicationdb.model;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
+import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 
 public class Following extends ArrayList<Follows> {
-    public Following() throws DatabaseConnectionFailedException {
-        JDBCModel jdbcModel = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
-        for (Follows follows : jdbcModel.getFollows()) {
-            this.add(follows);
+
+    public Following() throws DatabaseOperationException {
+        try ( JDBCModel jdbcModel = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);) {
+            for (Follows follows : jdbcModel.getFollows()) {
+                this.add(follows);
+            }
+        } catch (SQLException e) {
+            throw new DatabaseOperationException("Unable to get follow table", e);
         }
+
     }
-    
-    public boolean ifUsernameExists(String username){
+
+    public boolean ifUsernameExists(String username) {
         for (Follows follows : this) {
             if (follows.getUsername().equals(username)) {
                 return true;
@@ -38,8 +46,10 @@ public class Following extends ArrayList<Follows> {
             for (Follows posts : jdbcModel.getFollows()) {
                 System.out.println(posts);
             }
-        } catch (DatabaseConnectionFailedException ex) {
+        } catch (SQLException ex) {
             System.out.println("Failed");
+        } catch (DatabaseOperationException ex) {
+            Logger.getLogger(Following.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

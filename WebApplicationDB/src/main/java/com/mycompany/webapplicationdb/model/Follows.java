@@ -1,12 +1,13 @@
 package com.mycompany.webapplicationdb.model;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 
 import com.mycompany.webapplicationdb.exception.AlreadyFollowedException;
-import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
+import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 import com.mycompany.webapplicationdb.exception.FullFollowsException;
 import com.mycompany.webapplicationdb.exception.NoUserFoundException;
 
@@ -43,7 +44,7 @@ public class Follows {
     }
 
     // TODO: method to remove a follower
-    public void removeFollow(String username) throws DatabaseConnectionFailedException, NoUserFoundException {
+    public void removeFollow(String username) throws DatabaseOperationException, NoUserFoundException {
 
         // remove in object
         boolean found = false;
@@ -53,65 +54,67 @@ public class Follows {
                 follows[i] = null;
                 break;
             }
-            
+
         }
-        if(!found){
+        if (!found) {
             throw new NoUserFoundException();
         }
-
         // identify which column contains the username
-        String column = "";
-        JDBCModel model = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
-        String query = "SELECT follow1,follow2,follow3 FROM follows WHERE username = ?";
-        try (PreparedStatement stmt = model.getConnection().prepareStatement(query)) {
-            stmt.setString(1, this.username);
-            // tester
-            System.out.println("query-identify:" + stmt);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                for (int i = 1; i <= 3; i++) {
-                    String account = rs.getString("follow" + (i));
-                    if (account == null) {
-                        continue;
+        String column = null;
+
+        String selectQuery = "SELECT follow1, follow2, follow3 FROM follows WHERE username = ?";
+        String updateQuery = "UPDATE follows SET %s = null WHERE username = ?";
+
+        try (JDBCModel model = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+             Connection conn = model.getConnection()) {
+            conn.setAutoCommit(false); // Start transaction
+
+            try (PreparedStatement selectStmt = conn.prepareStatement(selectQuery)) {
+                selectStmt.setString(1, this.username);
+                System.out.println("query-identify:" + selectStmt);
+                ResultSet rs = selectStmt.executeQuery();
+                if (rs.next()) {
+                    for (int i = 1; i <= 3; i++) {
+                        String account = rs.getString("follow" + i);
+                        if (account != null && account.equals(username)) {
+                            column = "follow" + i;
+                            break;
+                        }
                     }
-                    if (account.equals(username)) {
-                        column = "follow" + i;
-                        break;
-                    }
-                    // no username found in follows
-                    column = null;
                 }
 
-            }
-        } catch (SQLException e) {
-            // show error message
-            System.out.println("Error-removeFollow: " + e.getMessage() + " exception:" + e.getClass());
-            throw new DatabaseConnectionFailedException();
-        }
+                if (column == null) {
+                    System.out.println("No user found=-removeFollow");
+                    throw new NoUserFoundException();
+                }
 
-        // remove in database
-        if (column == null) {
-            // tester
-            System.out.println("No user found=-removeFollow");
-            throw new NoUserFoundException();
-        }
-        JDBCModel model1 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
-        String query1 = "update follows set " + column + " = null where username = ?";
-        try (PreparedStatement stmt = model1.getConnection().prepareStatement(query1)) {
-            stmt.setString(1, this.username);
-            // tester
-            System.out.println("query-removeFollowdatabase:" + stmt);
-            stmt.executeUpdate();
+                try (PreparedStatement updateStmt = conn.prepareStatement(String.format(updateQuery, column))) {
+                    updateStmt.setString(1, this.username);
+                    System.out.println("query-removeFollowdatabase:" + updateStmt);
+                    updateStmt.executeUpdate();
+                }
+
+            } catch (SQLException e) {
+                try {
+                    conn.rollback(); // Rollback transaction
+                } catch (SQLException e2) {
+                    System.out.println("Error-removeFollow-rollback: " + e2.getMessage() + " exception:" + e2.getClass());
+                }
+                System.out.println("Error-removeFollow: " + e.getMessage() + " exception:" + e.getClass());
+                throw new DatabaseOperationException("Unable to remove follow", e);
+            }
+
+            conn.commit(); // Commit transaction
+
         } catch (SQLException e) {
-            // show error message
-            System.out.println("Error-removeFollowdatabase: " + e.getMessage() + " exception:" + e.getClass());
-            throw new DatabaseConnectionFailedException();
+            System.out.println("Error-removeFollow: " + e.getMessage() + " exception:" + e.getClass());
+            throw new DatabaseOperationException("Unable to remove follow", e);
         }
 
     }
 
     // TODO: method to add a follower
-    public void addFollow(String username) throws DatabaseConnectionFailedException, FullFollowsException,
+    public void addFollow(String username) throws DatabaseOperationException, FullFollowsException,
             NoUserFoundException, AlreadyFollowedException {
         // identify if follows are full
         if (ifFollowsFull()) {
@@ -120,7 +123,7 @@ public class Follows {
             throw new FullFollowsException();
         }
 
-        //identify if already followed
+        // identify if already followed
         for (String follow : follows) {
             System.out.println("Comparing: " + follow + " with " + username);
             if (follow != null && follow.equals(username)) {
@@ -138,49 +141,52 @@ public class Follows {
 
         // identify which column is null(empty) in the database
         String column = null;
-        JDBCModel model = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
-        String query = "SELECT follow1,follow2,follow3 FROM follows WHERE username = ?";
-        try (PreparedStatement stmt = model.getConnection().prepareStatement(query)) {
-            stmt.setString(1, this.username);
-            // tester
-            System.out.println("query-identify:" + stmt);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                for (int i = 1; i <= 3; i++) {
-                    Object account = rs.getObject("follow" + (i));
-                    // tester
-                    System.out.println("x\nx\nx:" + account);
-                    if (account == null) {
-                        column = "follow" + i;
-                        break;
+        try (JDBCModel model = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+                Connection conn = model.getConnection()) {
+            conn.setAutoCommit(false);
+            String query = "SELECT follow1,follow2,follow3 FROM follows WHERE username = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, this.username);
+                // tester
+                System.out.println("query-identify:" + stmt);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    for (int i = 1; i <= 3; i++) {
+                        Object account = rs.getObject("follow" + (i));
+                        // tester
+                        System.out.println("x\nx\nx:" + account);
+                        if (account == null) {
+                            column = "follow" + i;
+                            break;
+                        }
                     }
+                }
+
+                if (column == null) {
+                    // tester
+                    System.out.println("No column with null found");
+                    throw new FullFollowsException();
+                }
+
+                // add in database
+                String query1 = "update follows set " + column + "= ? where username = ?";
+                try (PreparedStatement stmt1 = conn.prepareStatement(query1)) {
+                    stmt1.setString(1, username);
+                    stmt1.setString(2, this.username);
+                    // tester
+                    System.out.println("query-addFollowdatabase:" + stmt1);
+                    stmt1.executeUpdate();
+                    conn.commit();
+                } catch (SQLException e) {
+                    conn.rollback(); // Undo all changes if something goes wrong
+                    System.out.println("Transaction failed! Rolling back...");
+                    System.out.println("Error-addFollowdatabase: " + e.getMessage() + " exception:" + e.getClass());
+                    throw new DatabaseOperationException("Unable to add follow", e);
                 }
             }
         } catch (SQLException e) {
-            // show error message
-            System.out.println("Error-removeFollow: " + e.getMessage() + " exception:" + e.getClass());
-            throw new DatabaseConnectionFailedException();
-        }
-        if (column == null) {
-            // tester
-            System.out.println("No column with null found");
-            throw new FullFollowsException();
-        }
-
-        // add in database
-        JDBCModel model1 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
-        String query1 = "update follows set "+column+"= ? where username = ?";
-        try (PreparedStatement stmt = model1.getConnection().prepareStatement(query1)) {
-            stmt.setString(1, username);
-            stmt.setString(2, this.username);
-            // tester
-            System.out.println("query-addFollowdatabase:" + stmt);
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            // show error message
-            System.out.println("Error-addFollowdatabase: " + e.getMessage() + " exception:" + e.getClass());
-            throw new DatabaseConnectionFailedException();
+            System.out.println("Error-addFollow: " + e.getMessage() + " exception:" + e.getClass());
+            throw new DatabaseOperationException("Unable to add follow", e);
         }
 
     }

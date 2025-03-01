@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.mycompany.webapplicationdb.exception.BadRequestException;
-import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
+import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 import com.mycompany.webapplicationdb.exception.UnauthorizedAccessException;
 import com.mycompany.webapplicationdb.model.Posts;
 import com.mycompany.webapplicationdb.model.PostsList;
@@ -35,10 +35,10 @@ public class CreatePostServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      * @throws
-     * com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException
+     * com.mycompany.webapplicationdb.exception.DatabaseOperationException
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseConnectionFailedException, UnauthorizedAccessException, BadRequestException {
+            throws ServletException, IOException, DatabaseOperationException, UnauthorizedAccessException, BadRequestException {
         response.setContentType("text/html;charset=UTF-8");
         // 1. HANDLE UNEXPECTED ACCESS(Session)
         // check if session object has attribute username
@@ -80,7 +80,7 @@ public class CreatePostServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try {
             processRequest2(request, response);
-        } catch (DatabaseConnectionFailedException e) {
+        } catch (DatabaseOperationException e) {
             //TODO: handle exceptions
         } catch (UnauthorizedAccessException ex) {
             System.out.println("UNAUTHORIZED ACCESS");

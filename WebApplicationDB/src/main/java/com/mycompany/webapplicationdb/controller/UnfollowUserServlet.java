@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
+import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 import com.mycompany.webapplicationdb.exception.NoUserFoundException;
 import com.mycompany.webapplicationdb.model.Following;
 import com.mycompany.webapplicationdb.model.Follows;
@@ -35,7 +35,7 @@ public class UnfollowUserServlet extends HttpServlet {
      * @throws NoUserFoundException
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseConnectionFailedException, NoUserFoundException {
+            throws ServletException, IOException, DatabaseOperationException, NoUserFoundException {
         response.setContentType("text/html;charset=UTF-8");
         // TODO: handle unexcpected access
 
@@ -61,7 +61,7 @@ public class UnfollowUserServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try {
             processRequest2(request, response);
-        } catch (DatabaseConnectionFailedException e) {
+        } catch (DatabaseOperationException e) {
 
         } catch (NoUserFoundException e) {
             // TODO Auto-generated catch block

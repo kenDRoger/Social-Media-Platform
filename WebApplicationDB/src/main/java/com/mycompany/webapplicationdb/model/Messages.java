@@ -1,18 +1,23 @@
 package com.mycompany.webapplicationdb.model;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
+import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 
 public class Messages extends ArrayList<Message> {
-    public Messages() throws DatabaseConnectionFailedException{
-        JDBCModel jdbcModel = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
-        for (Message message : jdbcModel.getMessages()) {
+    public Messages() throws DatabaseOperationException{
+        try(JDBCModel jdbcModel = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE)){
+            for (Message message : jdbcModel.getMessages()) {
             this.add(message);
         }
+        }catch(SQLException e){
+            throw new DatabaseOperationException("Unable to get Messages table", e);
+        }
+        
     }
     public Message getMessageByUsername(String username){
         for(Message message : this){
@@ -23,28 +28,40 @@ public class Messages extends ArrayList<Message> {
         return null;
     }   
 
-    public void addMessage(String username, String subject, String content) throws DatabaseConnectionFailedException{
-        
+    public void addMessage(String username, String subject, String content) throws DatabaseOperationException{
         Message newMessage = new Message(username, subject, content);
-        
-        JDBCModel jdbcModel = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+
         String query3 = "INSERT INTO messages (username, subject, content) VALUES (?, ?, ?)";
-        try (PreparedStatement stmt = jdbcModel.getConnection().prepareStatement(query3);) {
-            stmt.setString(1, newMessage.getUsername());
-            stmt.setString(2, newMessage.getSubject());
-            stmt.setString(3, newMessage.getContent());
+        try (JDBCModel jdbcModel = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+             Connection conn = jdbcModel.getConnection()) {
 
-            //tester
-            System.out.println("Query-addMessage:"+stmt);
+            conn.setAutoCommit(false); // Start transaction
 
-            stmt.executeUpdate();
+            try (PreparedStatement stmt = conn.prepareStatement(query3)) {
+                stmt.setString(1, newMessage.getUsername());
+                stmt.setString(2, newMessage.getSubject());
+                stmt.setString(3, newMessage.getContent());
+
+                //tester
+                System.out.println("Query-addMessage:" + stmt);
+
+                stmt.executeUpdate();
+                conn.commit(); // Commit transaction
+            } catch (SQLException e) {
+                conn.rollback(); // Rollback transaction
+                System.out.println("Error-addMessage: " + e.getMessage() + " exception:" + e.getClass());
+                throw new DatabaseOperationException("Unable to add message", e);
+            }
         } catch (SQLException e) {
-            System.out.println("Error-addMessage: " + e.getMessage() + " exception:" + e.getClass());
-            throw new DatabaseConnectionFailedException();
+            System.out.println("Error-connection: " + e.getMessage() + " exception:" + e.getClass());
+            throw new DatabaseOperationException("Unable to establish connection", e);
         }
         this.add(newMessage);
     }
     
+    //TODO: removeMessage method for resolveServlet
+    
+
     public ArrayList<Message> get5LatestMessages() {
         ArrayList<Message> latestMessages = new ArrayList<>();
         int i = 0;
@@ -72,7 +89,7 @@ public class Messages extends ArrayList<Message> {
         return latestMessages;
     }
 
-    public static void main(String[] args) throws DatabaseConnectionFailedException {
+    public static void main(String[] args) throws DatabaseOperationException {
         Messages messages = new Messages();
         messages.addMessage("username", "subject", "content");
         for (Message message : messages) {

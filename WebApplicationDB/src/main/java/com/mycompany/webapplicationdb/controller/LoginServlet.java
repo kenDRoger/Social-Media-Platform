@@ -4,6 +4,7 @@
  */
 package com.mycompany.webapplicationdb.controller;
 
+import com.mycompany.webapplicationdb.exception.BadRequestException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,8 +16,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
+import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
+import com.mycompany.webapplicationdb.model.Account;
 import com.mycompany.webapplicationdb.model.Accounts;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -27,56 +31,55 @@ public class LoginServlet extends HttpServlet {
 
     // New method for processrequest to handle the exceptions
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseConnectionFailedException {
+            throws ServletException, IOException, DatabaseOperationException, BadRequestException {
         response.setContentType("text/html;charset=UTF-8");
-        
-        
+
         HttpSession session = request.getSession();
-         
+
         // 2. GET PARAMETERS
         // get the username and password from the form
         String username = request.getParameter("username");
         String password = request.getParameter("password");
+        //check if null
+        BadRequestException.checkIfValidRequests(username,password);
 
         // 3. GET DATABASE DATA
-
         // 4. INITIALIZE MODELS
-        
         Accounts accounts = new Accounts();
         Map<String, String> map = accounts.getCredentials();
-        
-        String userRole = accounts.findUserByUsername(username).getUserRole();
-        
 
-        // 5. SERVLET LOGIC
-        // check if session object has attribute username(if user is not already logged in)
-        if (session.getAttribute("username") == null) {
-            // check if username exists
-            if (!map.containsKey(username)) {
-                request.setAttribute("error", "Username does not exist");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
-                return;
-            }
-            // check if password is correct
-            if (!map.get(username).equals(password)) {
-                request.setAttribute("error", "Password is incorrect");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
-                return;
-            }
+        //tester
+        System.out.println("username:" + username);
+        System.out.println("accounts:" + accounts);
 
-            // set attribute for authentication in each page
-            session.setAttribute("username", username);
-            session.setAttribute("user_role", userRole);
+        ;
+
+        // check if username exists
+        if (!map.containsKey(username)) {
+            request.setAttribute("error", "Username does not exist");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+            return;
         }
-        
+        // check if password is correct
+        if (!map.get(username).equals(password)) {
+            request.setAttribute("error", "Password is incorrect");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+            return;
+        }
+
+        Account account = accounts.findAccountByUsername(username);
+        String userRole = account.getUserRole();
+        // set attribute for authentication in each page
+        session.setAttribute("username", username);
+        session.setAttribute("user_role", userRole);
+
         //Tester
-        System.out.println("RUNNINGGG:"+userRole);
+        System.out.println("RUNNINGGG:" + userRole);
 
         // 6. REDIRECT LOGIC
         // check if user is user
         if (userRole.equals("user")) {
             // TODO: set session attribute for landing page
-
 
             // forward to landing page
             response.sendRedirect("landing.jsp");
@@ -93,10 +96,10 @@ public class LoginServlet extends HttpServlet {
         if (userRole.equals("super_admin")) {
             // get list of users
             // TODO: Additional code for when super admin is confirmed to be able to CRUD
-            
 
             // forward to admin page
             response.sendRedirect("admin/admin.jsp");
+            return;
         }
     }
 
@@ -113,7 +116,7 @@ public class LoginServlet extends HttpServlet {
             throws ServletException, IOException {
         try {
             processRequest2(request, response);
-        } catch (DatabaseConnectionFailedException ex) {
+        } catch (DatabaseOperationException ex) {
             // TODO: Double check navigation
             request.setAttribute("error", "Database connection failed - LoginServlet");
             request.setAttribute("title", "Database Connection Failed");
@@ -125,10 +128,12 @@ public class LoginServlet extends HttpServlet {
             });
             Map<String, String> navigation = new HashMap<>();
             navigation.put("Try again later", "login.jsp");
-            navigation.put("Contact the web administrator", "mailto:webadmin@localhost");
             request.setAttribute("navigation", navigation);
             request.setAttribute("code", "500");
             request.getRequestDispatcher("error.jsp").forward(request, response);
+        } catch (BadRequestException ex) {
+            //TODO: handle exception
+            Logger.getLogger(LoginServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

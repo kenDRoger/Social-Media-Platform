@@ -1,5 +1,6 @@
 package com.mycompany.webapplicationdb.model;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,13 +9,17 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
+import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
+import com.mycompany.webapplicationdb.exception.NoPostFoundException;
 
 public class Posts {
+
     private String username;
     private PostData[] posts = new PostData[5];
-    private static int newID = getLatestID();
+    private static int newID;
 
     public boolean ifPostsNoNull() {
         boolean b = true;
@@ -25,8 +30,8 @@ public class Posts {
         }
         return b;
     }
-    
-    public boolean ifPostsNull(){
+
+    public boolean ifPostsNull() {
         boolean b = true;
         for (PostData post : posts) {
             if (post != null) {
@@ -37,28 +42,32 @@ public class Posts {
     }
 
     public Posts(String username, PostData post1, PostData post2, PostData post3, PostData post4, PostData post5)
-            throws DatabaseConnectionFailedException {
+            throws DatabaseOperationException {
         this.username = username;
         posts[0] = post1;
         posts[1] = post2;
         posts[2] = post3;
         posts[3] = post4;
         posts[4] = post5;
+        newID = getLatestID();
     }
 
     // method to get the highest id in the post table database
-    public static int getLatestID() {
+    public int getLatestID() throws DatabaseOperationException {
         // query in the database in table post for the highest id
         int highestID = 0;
         String query = "SELECT max(id) from post";
-        try {
-            Statement stmt = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE).getConnection().createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-            while (rs.next()) {
-                highestID = rs.getInt(1);
+
+        try (JDBCModel model = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+                Connection conn = model.getConnection();
+                Statement stmt = conn.createStatement()) {
+            try (ResultSet rs = stmt.executeQuery(query)) {
+                while (rs.next()) {
+                    highestID = rs.getInt(1);
+                }
             }
-        } catch (SQLException | DatabaseConnectionFailedException e) {
-            System.out.println("Error in getLatestID method");
+        } catch (SQLException e) {
+            throw new DatabaseOperationException("Unable to get latest ID", e);
         }
 
         if (newID > highestID) {
@@ -67,13 +76,14 @@ public class Posts {
         return highestID;
     }
 
-    public String getColumnNameWithLowestID() throws DatabaseConnectionFailedException {
-        JDBCModel model = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+    public String getColumnNameWithLowestID() throws DatabaseOperationException {
+
         // select post1-5 from posts where username matches
         String query1 = "SELECT post1, post2, post3, post4, post5 FROM posts WHERE username = ?";
         int lowestID = Integer.MAX_VALUE;
         int lowestIndex = -1;
-        try (PreparedStatement stmt = model.getConnection().prepareStatement(query1)) {
+        try (JDBCModel model = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+                PreparedStatement stmt = model.getConnection().prepareStatement(query1);) {
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -91,10 +101,9 @@ public class Posts {
                 }
             }
         } catch (SQLException e) {
-            // show error message
-            System.out.println("Error-getColumnnamewithlowestid: " + e.getMessage() + " exception:" + e.getClass());
-            throw new DatabaseConnectionFailedException();
+            throw new DatabaseOperationException("Unable to get ColumnNameWithLowestID", e);
         }
+
         return "post" + lowestIndex;
     }
 
@@ -103,8 +112,9 @@ public class Posts {
         int lowestID = Integer.MAX_VALUE;
         for (PostData post : posts) {
             if (post != null) {
-                if (post.getId() < lowestID)
+                if (post.getId() < lowestID) {
                     lowestID = post.getId();
+                }
                 // tester
                 System.out.println("ID:" + post.getId());
             } else {
@@ -117,51 +127,60 @@ public class Posts {
         return lowestID;
     }
 
-    public void updatePostOrder() throws DatabaseConnectionFailedException { // Only called in addpost and deletepost
+    public void updatePostOrder() throws DatabaseOperationException { // Only called in addpost and deletepost
         // Sorts the posts array with the PostData having the largest id first, treating
         // nulls as smallest
         Arrays.sort(posts, Comparator.nullsLast(
                 Comparator.comparing(PostData::getId, Comparator.nullsFirst(Comparator.naturalOrder())).reversed()));
     }
 
-    public void addPost(String title, String content) throws DatabaseConnectionFailedException {
+    public void addPost(String title, String content) throws DatabaseOperationException {
         updatePostOrder();
 
         // update newstid value
 
         // add post in post table with the new id and the parameters, title, content,
         // date_created
-        JDBCModel model2 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
-        String query3 = "INSERT INTO post (title, content, date_created, username) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement stmt = model2.getConnection().prepareStatement(query3);) {
-            stmt.setString(1, title);
-            stmt.setString(2, content);
-            stmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-            stmt.setString(4, username);
-            // tester
-            System.out.println("queryquery3: " + stmt);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println("Error-query3: " + e.getMessage() + " exception:" + e.getClass());
-            throw new DatabaseConnectionFailedException();
-        }
+        /**
+         * 1. "INSERT INTO post (title, content, date_created, username) VALUES (?, ?,
+         * ?, ?)"
+         * 2. "UPDATE posts SET " + lowestColumn + " = ? WHERE username = ?"
+         */
 
-        newID = getLatestID();
-        String lowestColumn = getColumnNameWithLowestID();
+        String intoPostQuery = "INSERT INTO post (title, content, username) VALUES (?, ?, ?)";
+        String updatePostsQuery = "UPDATE posts SET " + getColumnNameWithLowestID() + " = ? WHERE username = ?";
 
-        // update post5(id) in post table where username = this.username in database(id
-        // is autoincremented)
-        JDBCModel model1 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
-        String query2 = "UPDATE posts SET " + lowestColumn + " = ? WHERE username = ?";
-        try (PreparedStatement stmt = model1.getConnection().prepareStatement(query2);) {
-            stmt.setInt(1, newID);
-            stmt.setString(2, username);
-            // tester
-            System.out.println("queryquery2: " + stmt);
-            stmt.executeUpdate();
+        try (JDBCModel model = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+                Connection conn = model.getConnection();) {
+            conn.setAutoCommit(false);
+
+            try (PreparedStatement intoPostStmt = conn.prepareStatement(intoPostQuery);
+                    PreparedStatement updatePostStmt = conn.prepareStatement(updatePostsQuery);) {
+                intoPostStmt.setString(1, title);
+                intoPostStmt.setString(2, content);
+                intoPostStmt.setString(3, username);
+                // tester
+                System.out.println("query1: " + intoPostStmt);
+                intoPostStmt.executeUpdate();
+                conn.commit();
+
+                newID = getLatestID();
+
+                updatePostStmt.setInt(1, newID);
+                updatePostStmt.setString(2, username);
+                // tester
+                System.out.println("query2: " + updatePostStmt);
+                updatePostStmt.executeUpdate();
+
+            } catch (SQLException e) {
+                conn.rollback();
+                System.out.println("Transaction failed! Rolling back...");
+                throw new DatabaseOperationException("Unable to add post", e);
+            }
+
+            conn.commit();
         } catch (SQLException e) {
-            System.out.println("Error-query2: " + e.getMessage() + " exception:" + e.getClass());
-            throw new DatabaseConnectionFailedException();
+            throw new DatabaseOperationException("Unable to add post", e);
         }
 
         // delete the dereferenced post(with an id of getLowestLocalID)
@@ -177,20 +196,29 @@ public class Posts {
         posts[lowestIndex].setId(newID++);
 
         updatePostOrder();
+
     }
 
-    public void deleteFromPostWhereID(int id) throws DatabaseConnectionFailedException {
+    public void deleteFromPostWhereID(int id) throws DatabaseOperationException {
         // delete the post in post table
-        JDBCModel model3 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+
         String query4 = "DELETE FROM post WHERE id = ?";
-        try (PreparedStatement stmt = model3.getConnection().prepareStatement(query4);) {
-            stmt.setInt(1, id);
-            // tester
-            System.out.println("Querywhereid: " + stmt);
-            stmt.executeUpdate();
+        try (JDBCModel model3 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+                Connection conn = model3.getConnection()) {
+            conn.setAutoCommit(false);
+
+            try (PreparedStatement stmt = model3.getConnection().prepareStatement(query4)) {
+                stmt.setInt(1, id);
+                // tester
+                System.out.println("Querywhereid: " + stmt);
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw new DatabaseOperationException("Unable to delete post id:" + id, e);
+            }
+            conn.commit();
         } catch (SQLException e) {
-            System.out.println("Error-whereid: " + e.getMessage() + " exception:" + e.getClass());
-            throw new DatabaseConnectionFailedException();
+            throw new DatabaseOperationException("Unable to delete post id:" + id, e);
         }
         // remove post with the given id from the posts array
         for (int i = 0; i < posts.length; i++) {
@@ -201,17 +229,23 @@ public class Posts {
         }
     }
 
-    public void deleteFromPostsOfUser() throws DatabaseConnectionFailedException {
-        JDBCModel model3 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+    public void deleteFromPostsOfUser() throws DatabaseOperationException {
         String query4 = "DELETE FROM post WHERE username = ?";
-        try (PreparedStatement stmt = model3.getConnection().prepareStatement(query4);) {
-            stmt.setString(1, username);
-            // tester
-            System.out.println("Queryofuser: " + stmt);
-            stmt.executeUpdate();
+        try (JDBCModel model3 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+                Connection conn = model3.getConnection();) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement stmt = model3.getConnection().prepareStatement(query4);) {
+                stmt.setString(1, username);
+                // tester
+                System.out.println("Queryofuser: " + stmt);
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw new DatabaseOperationException("Unable to delete post of user", e);
+            }
+            conn.commit();
         } catch (SQLException e) {
-            System.out.println("Error-ofuser: " + e.getMessage() + " exception:" + e.getClass());
-            throw new DatabaseConnectionFailedException();
+            throw new DatabaseOperationException("Unable to delete post of user", e);
         }
         // remove post with the given user from the posts array
         for (int i = 0; i < posts.length; i++) {
@@ -239,22 +273,27 @@ public class Posts {
         return lowestIndex;
     }
 
-    public void updatePost(int id, PostData post) throws DatabaseConnectionFailedException {
+    public void updatePost(int id, PostData post) throws DatabaseOperationException {
         updatePostOrder();
 
-        JDBCModel model = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
         String query = "UPDATE post SET title = ?, content = ? where id = ?";
-        try (PreparedStatement stmt = model.getConnection().prepareStatement(query);) {
-            stmt.setString(1, post.getTitle());
-            stmt.setString(2, post.getContent());
-            stmt.setInt(3, id);
-            // tester
-            System.out.println("Query: " + stmt);
-            stmt.executeUpdate();
+        try (JDBCModel model = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+                Connection conn = model.getConnection();) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement stmt = model.getConnection().prepareStatement(query);) {
+                stmt.setString(1, post.getTitle());
+                stmt.setString(2, post.getContent());
+                stmt.setInt(3, id);
+                // tester
+                System.out.println("Query: " + stmt);
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw new DatabaseOperationException("Unable to update post", e);
+            }
+            conn.commit();
         } catch (SQLException e) {
-            // tester
-            System.out.println("Error-updatepost: " + e.getMessage() + " exception:" + e.getClass());
-            throw new DatabaseConnectionFailedException();
+            throw new DatabaseOperationException("Unable to update post", e);
         }
 
         // update postdataobject here
@@ -267,55 +306,59 @@ public class Posts {
         updatePostOrder();
     }
 
-    public void deletePost() throws DatabaseConnectionFailedException {
-
-    }
-
-    public void deletePost(int id) throws DatabaseConnectionFailedException {
+    public void deletePost(int id) throws DatabaseOperationException, NoPostFoundException {
         // delete the id of post in posts tablee
         // get the column name with value id
-        JDBCModel model3 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
-        String query1 = "SELECT post1, post2, post3, post4, post5 FROM posts WHERE username = ?";
 
-        String column = "";
-        try (PreparedStatement stmt = model3.getConnection().prepareStatement(query1)) {
-            stmt.setString(1, username);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                if (rs.getInt("post1") == id) {
-                    column = "post1";
-                } else if (rs.getInt("post2") == id) {
-                    column = "post2";
-                } else if (rs.getInt("post3") == id) {
-                    column = "post3";
-                } else if (rs.getInt("post4") == id) {
-                    column = "post4";
-                } else if (rs.getInt("post5") == id) {
-                    column = "post5";
+        String selectQuery = "SELECT post1, post2, post3, post4, post5 FROM posts WHERE username = ?";
+        String updateQuery = "UPDATE posts SET %s = NULL WHERE username = ?";
+        try (JDBCModel model = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
+                Connection conn = model.getConnection();) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement stmt = model.getConnection().prepareStatement(selectQuery);) {
+                stmt.setString(1, username);
+                // tester
+                System.out.println("Query: " + stmt);
+                ResultSet rs = stmt.executeQuery();
+                String column = null;
+                if (rs.next()) {
+
+                    if (rs.getInt("post1") == id) {
+                        column = "post1";
+                    } else if (rs.getInt("post2") == id) {
+                        column = "post2";
+                    } else if (rs.getInt("post3") == id) {
+                        column = "post3";
+                    } else if (rs.getInt("post4") == id) {
+                        column = "post4";
+                    } else if (rs.getInt("post5") == id) {
+                        column = "post5";
+                    }
                 }
+                if (column == null || column.equals("")) {
+                    throw new NoPostFoundException(
+                            "No post with id " + id + " found in posts table of user " + username);
+                }
+                try(PreparedStatement stmt2 = model.getConnection().prepareStatement(String.format(updateQuery, column));){
+                    stmt2.setString(1, username);
+                    // tester
+                    System.out.println("Query: " + stmt2);
+                    stmt2.executeUpdate();
+                }
+            } catch (SQLException e) {
+                conn.rollback();
+                throw new DatabaseOperationException("Unable to delete post", e);
             }
+            conn.commit();
         } catch (SQLException e) {
-            System.out.println("Error-integermaxvalue: " + e.getMessage() + " exception:" + e.getClass());
-            throw new DatabaseConnectionFailedException();
-        }
-
-        JDBCModel model2 = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
-        String query3 = "UPDATE posts SET " + column + " = NULL WHERE username = ?";
-        try (PreparedStatement stmt = model2.getConnection().prepareStatement(query3);) {
-            stmt.setString(1, username);
-            // tester
-            System.out.println("Queryset0: " + stmt);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println("Error-set0: " + e.getMessage() + " exception:" + e.getClass());
-            throw new DatabaseConnectionFailedException();
+            throw new DatabaseOperationException("Unable to delete post", e);
         }
 
         deleteFromPostWhereID(id);
     }
 
     public static void main(String[] args) {
-
+        //Tester
         try {
             JDBCModel jdbcModel = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
             ArrayList<Posts> allPosts = jdbcModel.getPosts();
@@ -345,7 +388,7 @@ public class Posts {
             // Test updatePost
             newPost = new PostData("Updated Post", "This is an updated post",
                     new Timestamp(System.currentTimeMillis()), "user1").setId(16);// from form data(hidden value
-                                                                                   // siguro) kapag nagmomodify
+            // siguro) kapag nagmomodify
             user1.updatePost(newPost.getId(), newPost);
             System.out.println("After updating the post:");
             // tester
@@ -365,8 +408,12 @@ public class Posts {
                 System.out.println(d);
             }
 
-        } catch (DatabaseConnectionFailedException ex) {
+        } catch (SQLException ex) {
             System.out.println("Failed");
+        } catch (DatabaseOperationException ex) {
+            Logger.getLogger(Posts.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoPostFoundException e) {
+            e.printStackTrace();
         }
 
     }

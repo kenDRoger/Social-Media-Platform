@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
+import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 import com.mycompany.webapplicationdb.exception.UnauthorizedAccessException;
 import com.mycompany.webapplicationdb.model.Messages;
 
@@ -34,11 +34,15 @@ public class SubmitHelpServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseConnectionFailedException, UnauthorizedAccessException {
+            throws ServletException, IOException, DatabaseOperationException, UnauthorizedAccessException {
         response.setContentType("text/html;charset=UTF-8");
         // check if session object has attribute username
         HttpSession session = request.getSession();
-
+        
+        //tester
+        System.out.println("username:"+(String)session.getAttribute("username"));
+        System.out.println("role:"+(String)session.getAttribute("user_role"));
+        
         UnauthorizedAccessException.checkAccessUser(session);
         //TODO: double check any null pointers
 
@@ -68,9 +72,11 @@ public class SubmitHelpServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try{
             processRequest2(request, response);
-        } catch (DatabaseConnectionFailedException ex) {
+        } catch (DatabaseOperationException ex) {
             //TODO: handle exception
+            System.out.println("DatabaseOperationException");
         } catch (UnauthorizedAccessException ex) {
+            System.out.println("UnauthorizedAccessException");
         }
     }
 

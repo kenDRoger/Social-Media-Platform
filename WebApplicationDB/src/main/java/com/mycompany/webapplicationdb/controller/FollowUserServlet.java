@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
+import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 import com.mycompany.webapplicationdb.exception.FullFollowsException;
 import com.mycompany.webapplicationdb.exception.NoUserFoundException;
 import com.mycompany.webapplicationdb.exception.AlreadyFollowedException;
@@ -40,7 +40,7 @@ public class FollowUserServlet extends HttpServlet {
      * @throws AlreadyFollowedException
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseConnectionFailedException, FullFollowsException,
+            throws ServletException, IOException, DatabaseOperationException, FullFollowsException,
             NoUserFoundException, SameUserFoundException, AlreadyFollowedException {
         response.setContentType("text/html;charset=UTF-8");
         // TODO: handle unexcpected access
@@ -74,7 +74,7 @@ public class FollowUserServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try {
             processRequest2(request, response);
-        } catch (DatabaseConnectionFailedException e) {
+        } catch (DatabaseOperationException e) {
             // TODO: handle catch
         } catch (FullFollowsException e) {
             request.setAttribute("errorFollow", "Full Follows");

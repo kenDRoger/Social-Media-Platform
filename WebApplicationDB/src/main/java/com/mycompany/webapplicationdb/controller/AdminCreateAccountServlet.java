@@ -7,7 +7,7 @@ package com.mycompany.webapplicationdb.controller;
 import com.mycompany.webapplicationdb.ValueValidation;
 import com.mycompany.webapplicationdb.exception.BadRequestException;
 import static com.mycompany.webapplicationdb.exception.BadRequestException.checkIfValidRequests;
-import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
+import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 import com.mycompany.webapplicationdb.exception.UnauthorizedAccessException;
 import static com.mycompany.webapplicationdb.exception.UnauthorizedAccessException.checkAccessAdmin;
 import com.mycompany.webapplicationdb.model.Accounts;
@@ -39,7 +39,7 @@ public class AdminCreateAccountServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseConnectionFailedException, UnauthorizedAccessException, BadRequestException, ValueValidation.InvalidUserNameLengthException, ValueValidation.InvalidPasswordLengthException, ValueValidation.InvalidUserRoleException, ValueValidation.EmptyUserNameException, ValueValidation.InvalidUserNameException, ValueValidation.EmptyPasswordException, ValueValidation.EmptyUserRoleException {
+            throws ServletException, IOException, DatabaseOperationException, UnauthorizedAccessException, BadRequestException, ValueValidation.InvalidUserNameLengthException, ValueValidation.InvalidPasswordLengthException, ValueValidation.InvalidUserRoleException, ValueValidation.EmptyUserNameException, ValueValidation.InvalidUserNameException, ValueValidation.EmptyPasswordException, ValueValidation.EmptyUserRoleException {
         response.setContentType("text/html;charset=UTF-8");
         //Handle unauthorized access
         HttpSession session = request.getSession();
@@ -74,7 +74,7 @@ public class AdminCreateAccountServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try {
             processRequest2(request, response);
-        } catch (DatabaseConnectionFailedException ex) {
+        } catch (DatabaseOperationException ex) {
             //TODO: DatabaseConnectionFailedException
             System.out.println("Type of Exception: " + ex.getClass());
         } catch (UnauthorizedAccessException ex) {

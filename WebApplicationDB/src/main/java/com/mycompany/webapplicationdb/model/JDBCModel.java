@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
+import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_PASSWORD;
 import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_PORT;
 import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_SERVERHOST;
@@ -16,7 +16,7 @@ import static com.mycompany.webapplicationdb.model.MySQLCredentials.DEFAULT_USER
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class JDBCModel {
+public class JDBCModel implements AutoCloseable {
 
     private Connection conn;
     private final String jdbcUrl;
@@ -31,7 +31,7 @@ public class JDBCModel {
     public static final String USERNAME = "root";
     public static final String PASSWORD = "1234";
 
-    public JDBCModel(String database) throws DatabaseConnectionFailedException {
+    public JDBCModel(String database) throws SQLException {
         String serverHost = SERVERHOST.isEmpty() ? DEFAULT_SERVERHOST : SERVERHOST;
         String port = PORT.isEmpty() ? DEFAULT_PORT : PORT;
         String databaseName = database.isEmpty() ? DATABASE : database;
@@ -43,7 +43,7 @@ public class JDBCModel {
     }
 
     // method to renew connection, always use this method in each method
-    private Connection renewConnection() throws DatabaseConnectionFailedException {
+    private Connection renewConnection() throws SQLException {
         try {
             if (conn != null) {
                 conn.close();
@@ -53,26 +53,21 @@ public class JDBCModel {
             // tester
             System.out.println("Successful Databse Connection using: " + jdbcUrl);
             return c;
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             System.out.println("Failed Databse Connection");
             if (e instanceof ClassNotFoundException) {
                 System.out.println("Driver not found");
             }
-            if (e instanceof SQLException) {
-                System.out.println("SQL Exception");
-            } else {
-                System.out.println("Unknown Exception");
-            }
-            throw new DatabaseConnectionFailedException();
         }
+        return null;
     }
 
     // Method to get the list of accounts from Connection
-    public ArrayList<Account> getAccounts() throws DatabaseConnectionFailedException {
-        conn = renewConnection();
+    public ArrayList<Account> getAccounts() throws DatabaseOperationException {
+        
         ArrayList<Account> accounts = new ArrayList<Account>();
         String query = "SELECT * FROM account";
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
+        try ( Statement stmt = renewConnection().createStatement();  ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
                 String u = rs.getString("username");
                 String p = rs.getString("password");
@@ -80,17 +75,16 @@ public class JDBCModel {
                 accounts.add(new Account(u, p, role));
             }
         } catch (SQLException e) {
-            throw new DatabaseConnectionFailedException();
+            throw new DatabaseOperationException("Unable to fetch Account Table",e);
         }
         return accounts;
     }
 
     // method to get the list of Follows from connection
-    public ArrayList<Follows> getFollows() throws DatabaseConnectionFailedException{
-        conn = renewConnection();
+    public ArrayList<Follows> getFollows() throws DatabaseOperationException {
         ArrayList<Follows> following = new ArrayList<>();
         String query = "SELECT * from follows";
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {            
+        try ( Statement stmt = renewConnection().createStatement();  ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
                 String username = rs.getString("username");
 
@@ -101,46 +95,43 @@ public class JDBCModel {
                 following.add(new Follows(username, follow1, follow2, follow3));
             }
         } catch (SQLException e) {
-            System.out.println("Error: "+e.getMessage());
-            throw new DatabaseConnectionFailedException();
+            System.out.println("Error: " + e.getMessage());
+            throw new DatabaseOperationException("Unable to fetch Follows table",e);
         }
         return following;
     }
 
     // Method to get the list of accounts from Connection
-    public ArrayList<Posts> getPosts() throws DatabaseConnectionFailedException { // for Entry
-        conn = renewConnection();
+    public ArrayList<Posts> getPosts() throws DatabaseOperationException { // for Entry
         ArrayList<Posts> entry = new ArrayList<Posts>();
         HashMap<Integer, PostData> posts = getPost();
         String query = "SELECT * from posts";
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {            
+        try ( Statement stmt = renewConnection().createStatement();  ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
-                System.out.println("Inside while loop");
                 String username = rs.getString("username");
-                
+
                 int post1 = rs.getInt("post1");
                 int post2 = rs.getInt("post2");
                 int post3 = rs.getInt("post3");
                 int post4 = rs.getInt("post4");
                 int post5 = rs.getInt("post5");
-                
+
                 entry.add(new Posts(username, posts.get(post1), posts.get(post2), posts.get(post3), posts.get(post4),
                         posts.get(post5)));
             }
         } catch (SQLException e) {
-            throw new DatabaseConnectionFailedException();
+            throw new DatabaseOperationException("Unable to fetch Posts table",e);
         }
 
         return entry;
     }
 
     // method to get the list of post from Connection
-    public HashMap<Integer, PostData> getPost() throws DatabaseConnectionFailedException {// helper method only for
-                                                                                          // getPosts
-        conn = renewConnection();
+    public HashMap<Integer, PostData> getPost() throws DatabaseOperationException {// helper method only for
+        // getPosts
         HashMap<Integer, PostData> posts = new HashMap<Integer, PostData>();
         String query = "SELECT * FROM post";
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
+        try ( Statement stmt = renewConnection().createStatement();  ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
                 String title = rs.getString("title");
                 String content = rs.getString("content");
@@ -151,18 +142,18 @@ public class JDBCModel {
             }
 
         } catch (SQLException e) {
-            
-            throw new DatabaseConnectionFailedException();
+
+            throw new DatabaseOperationException("Unable to fetch Post table",e);
         }
         return posts;
     }
 
     // method to get the list of messages from connection
-    public ArrayList<Message> getMessages() throws DatabaseConnectionFailedException{
-        conn = renewConnection();
-        ArrayList<Message> messages = new ArrayList<Message>();
-        String query = "SELECT * from messages";
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {            
+    public ArrayList<Message> getMessages() throws DatabaseOperationException {
+        ArrayList<Message> messages = new ArrayList<>();
+        String query = "SELECT * FROM messages";
+        try (Statement stmt = renewConnection().createStatement(); 
+             ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
                 String username = rs.getString("username");
                 String subject = rs.getString("subject");
@@ -171,8 +162,8 @@ public class JDBCModel {
                 messages.add(new Message(username, subject, content, time));
             }
         } catch (SQLException e) {
-            System.out.println("Error-getMessages: "+e.getMessage());
-            throw new DatabaseConnectionFailedException();
+            System.err.println("Error-getMessages: " + e.getMessage());
+            throw new DatabaseOperationException("Unable to fetch Messages Table", e);
         }
         return messages;
     }
@@ -185,7 +176,15 @@ public class JDBCModel {
     public static void main(String[] args) {
         try {
             new JDBCModel("mp2");
-        } catch (DatabaseConnectionFailedException ex) {
+        } catch (SQLException ex) {
+        }
+    }
+
+    @Override
+    public void close() throws SQLException {
+        if (conn != null && !conn.isClosed()) {
+            conn.close();
+            System.out.println("JDBCModel connection closed.");
         }
     }
 }

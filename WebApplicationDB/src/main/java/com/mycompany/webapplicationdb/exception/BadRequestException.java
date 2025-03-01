@@ -21,8 +21,12 @@ public class BadRequestException extends Exception {
     public static void checkIfValidRequests(Object... nonnull) throws BadRequestException {
         for (Object obj : nonnull) {
             if (obj == null) {
-                throw new BadRequestException();
+                throw new BadRequestException("Request invalid");
             }
         }
+    }
+    
+    public BadRequestException(String message){
+        super(message);
     }
 }

@@ -12,9 +12,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException;
+import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
+import com.mycompany.webapplicationdb.exception.NoPostFoundException;
 import com.mycompany.webapplicationdb.model.Posts;
 import com.mycompany.webapplicationdb.model.PostsList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -31,10 +34,10 @@ public class DeletePostServlet extends HttpServlet {
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
-     * @throws com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException
+     * @throws com.mycompany.webapplicationdb.exception.DatabaseOperationException
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseConnectionFailedException {
+            throws ServletException, IOException, DatabaseOperationException, NoPostFoundException {
         response.setContentType("text/html;charset=UTF-8");
         //TODO: handle unexcpected access
 
@@ -63,8 +66,11 @@ public class DeletePostServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try {
             processRequest2(request, response);
-        } catch (DatabaseConnectionFailedException e) {
+        } catch (DatabaseOperationException e) {
             //TODO: handle eexception
+            System.out.println("DatabaseOperationException");
+        } catch (NoPostFoundException ex) {
+            System.out.println("No post found exception");
         }
     }
 
