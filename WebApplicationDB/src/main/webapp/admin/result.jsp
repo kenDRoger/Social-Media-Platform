@@ -92,8 +92,6 @@
             </table>
             <% }%>
 
-            <br>
-            <a href="admin.jsp">Back to Admin Page</a>
         </div>
     </body>
 </html>

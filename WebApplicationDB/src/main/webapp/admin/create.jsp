@@ -30,7 +30,7 @@
                 <li><a href="${pageContext.request.contextPath}/admin/create.jsp">Create Account</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/update.jsp">Update Account</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/delete.jsp">Delete Account
-                <li><a href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
+                        <li><a href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
             </ul>
         </nav>
         <h1>Create a New Account</h1>
@@ -43,34 +43,34 @@
 
         %>
         <div class="accounts-block">
-        <form action="${pageContext.request.contextPath}/AdminCreateAccountServlet" method="post">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required><br><br>
+            <form action="${pageContext.request.contextPath}/AdminCreateAccountServlet" method="post">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required><br><br>
 
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required><br><br>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required><br><br>
 
-            <label for="user_role">User Role:</label>
-            <select id="user_role" name="user_role" required>
-                <%                if ("super_admin".equals(userRole)) {
-                %>
-                <option value="admin">Admin</option>
-                <option value="user">User</option>
-                <%
-                } else if ("admin".equals(userRole)) {
-                %>
-                <option value="user">User</option>
-                <%
-                    }
-                %>
-            </select><br><br>
+                <label for="user_role">User Role:</label>
+                <select id="user_role" name="user_role" required>
+                    <%                if ("super_admin".equals(userRole)) {
+                    %>
+                    <option value="admin">Admin</option>
+                    <option value="user">User</option>
+                    <%
+                    } else if ("admin".equals(userRole)) {
+                    %>
+                    <option value="user">User</option>
+                    <%
+                        }
+                    %>
+                </select><br><br>
 
-            <input type="submit" value="Create Account">
-            <c:if test="${not empty error}">
-                <p style="color:red;">${error}</p>
-            </c:if>
-        </form>
-            </div>
+                <input type="submit" value="Create Account">
+                <c:if test="${not empty error}">
+                    <p style="color:red;">${error}</p>
+                </c:if>
+            </form>
+        </div>
 
     </body>
 </html>
