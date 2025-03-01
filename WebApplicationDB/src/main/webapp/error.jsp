@@ -1,4 +1,4 @@
-<%-- 
+<%-- mema nalang magkopya
     Document   : error
     Created on : Feb 25, 2025, 9:33:03 AM
     Author     : Vince
@@ -15,24 +15,25 @@
     </head>
     <body>
         <header>
-            <h1>${title}</h1>
+            <h1 class="posts">${error}</h1>
         </header>
         <main>
-            <section>
+            <section class="posts">
                 <%
                     if (request.getAttribute("code") != null) {
                 %>
-                <p><strong>Error Code:</strong> ${requestScope.code}</p>
+                <h2><strong>Error Code:</strong> ${requestScope.code}</h2>
                 <% } %>
                 <%
                     if (request.getAttribute("message") != null) {
                 %>
-                <p><strong>Message:</strong> ${requestScope.message}</p>
+                <h3><strong>Message:</strong> ${requestScope.message}</h3>
                 <% } %>
                 <%
                     if (request.getAttribute("causes") != null) {
                 %>
-                <p><strong>Causes:</strong>
+                <div class="post">
+                <p ><strong>Causes:</strong>
                     <ul>
                         <%
                             String[] causes = (String[]) request.getAttribute("causes");
@@ -46,12 +47,13 @@
                         %>
                     </ul>
                 </p>
+                </div>
                 <% } %>
                 <%
                     if (request.getAttribute("exception") != null) {
                 %>
-                <h1><strong>Exception:</strong> ${requestScope.exception.class.name}</h1>
-                <p><strong>Exception Message:</strong> ${requestScope.exception.message}</p>
+                <p><strong>Exception:</strong> ${requestScope.exception.class.name}</p>
+                <p class="small"><strong>Exception Message:</strong> ${requestScope.exception.message}</p>
                 <% } %>
             </section>
         </main>

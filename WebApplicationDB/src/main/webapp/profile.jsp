@@ -1,9 +1,10 @@
-<%-- 
+<%-- mema nalang magkopya
     Document   : profile
     Created on : Feb 25, 2025, 7:24:13 AM
     Author     : Vince
 --%>
 
+<%@page import="com.mycompany.webapplicationdb.exception.UnauthorizedAccessException"%>
 <%@page import="com.mycompany.webapplicationdb.model.Posts"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="com.mycompany.webapplicationdb.model.PostData"%>
@@ -11,10 +12,11 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
 <%
-    session = request.getSession();
-    if (session.getAttribute("username") == null) {
-        //TODO: handle unexpected access
-        response.sendRedirect("login.jsp");
+    try {
+        UnauthorizedAccessException.checkAccessUser(session);
+    } catch (UnauthorizedAccessException e) {
+        e.setAttributesForUser(session, request, e);
+        request.getRequestDispatcher("/error.jsp").forward(request, response);
         return;
     }
     //get all the posts
@@ -22,10 +24,13 @@
 
     //get all posts of currUser
     String currUser = (String) session.getAttribute("username");
-    Posts posts = postsList.getPostsByUsername(currUser);
+    Posts posts = null;
+    if (postsList != null) {
+        posts = postsList.getPostsByUsername(currUser);
+    }
 
-    posts.updatePostOrder();
-    //TODO: check for null pointers
+    if (posts != null)
+        posts.updatePostOrder();
 %>
 <!DOCTYPE html>
 <html>
@@ -63,7 +68,7 @@
         </form>
         <%
             if (!posts.ifPostsNull()) {
-            System.out.println("XXXX:"+postsList);
+                System.out.println("XXXX:" + postsList);
 
         %>
         <!-- Display the latest 5 posts -->

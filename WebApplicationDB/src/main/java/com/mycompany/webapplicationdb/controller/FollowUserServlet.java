@@ -1,6 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+/**
+ * mema nalang mang kopya
+ * @author ken
  */
 package com.mycompany.webapplicationdb.controller;
 
@@ -89,6 +89,7 @@ public class FollowUserServlet extends HttpServlet {
         } catch (DatabaseOperationException e) {
             // TODO: handle catch
         } catch (UnauthorizedAccessException e) {
+            e.setAttributesForUser(request.getSession(), request, e);
         } catch (SameUserFoundException e) {
         } catch (NoUserFoundException e) {
         } catch (FullFollowsException e) {

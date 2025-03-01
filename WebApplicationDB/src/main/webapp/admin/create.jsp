@@ -1,5 +1,20 @@
+<%@page import="java.util.Map"%>
+<%@page import="java.util.HashMap"%>
+<%@page import="java.net.URLEncoder"%>
+<%@page import="com.mycompany.webapplicationdb.exception.UnauthorizedAccessException"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ page import="java.util.ArrayList" %>
+
+<%
+//mema nalang mag kopya
+    try {
+        UnauthorizedAccessException.checkAccessAdmin(session);
+    } catch (UnauthorizedAccessException e) {
+        e.setAttributesForAdmin(session, request, e);
+        request.getRequestDispatcher("/error.jsp").forward(request, response);
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -11,10 +26,10 @@
         <!-- Navigation Bar -->
         <nav>
             <ul>
-                <li><a href="admin.jsp">Home</a></li>
-                <li><a href="create.jsp">Create Account</a></li>
-                <li><a href="update.jsp">Update Account</a></li>
-                <li><a href="delete.jsp">Delete Account
+                <li><a href="${pageContext.request.contextPath}/admin/admin.jsp">Home</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/create.jsp">Create Account</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/update.jsp">Update Account</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/delete.jsp">Delete Account
                 <li><a href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
             </ul>
         </nav>
@@ -22,7 +37,6 @@
 
         <%
             //TODO: handle unexpected access
-
             // Get user role from session
             String userRole = (String) session.getAttribute("user_role");
 

@@ -1,8 +1,14 @@
+<!<!-- mema nalang magkopya -->
 
-
+<%@page import="com.mycompany.webapplicationdb.exception.UnauthorizedAccessException"%>
 <%
-    //TODO: handle unexpected access
-
+    try{
+        UnauthorizedAccessException.checkAccessUser(session);
+    }catch(UnauthorizedAccessException e){
+        e.setAttributesForUser(session, request, e);
+        request.getRequestDispatcher("/error.jsp").forward(request, response);
+        return;
+    }
     String currUser = (String) session.getAttribute("username");
 %>
 

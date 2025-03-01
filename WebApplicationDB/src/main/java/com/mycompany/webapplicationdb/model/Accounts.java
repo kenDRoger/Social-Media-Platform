@@ -1,3 +1,7 @@
+/**
+ * mema nalang mang kopya
+ * @author ken
+ */
 package com.mycompany.webapplicationdb.model;
 
 import java.sql.Connection;
@@ -105,15 +109,16 @@ public class Accounts extends ArrayList<Account> {
     public void deleteBulkAccounts(String[] usernames) throws DatabaseOperationException {
         for (String username : usernames) {
             if (username != null) {
-                if (this.contains(
-                        this.stream().filter(user -> user.getUsername().equals(username)).findFirst().get())) {
-                    try {
-                        deleteAccount(
-                                this.stream().filter(user -> user.getUsername().equals(username)).findFirst().get());
-                    } catch (DatabaseOperationException e) {
-                        System.out.println("Failed to delete account: " + username);
-                        throw new DatabaseOperationException("Failed to delete account: " + username, e);
+                try {
+                    Account user = this.stream().filter(u -> u.getUsername().equals(username)).findFirst().orElse(null);
+                    if (user != null) {
+                        deleteAccount(user);
+                    } else {
+                        System.out.println("Account not found: " + username);
                     }
+                } catch (DatabaseOperationException e) {
+                    System.out.println("Failed to delete account: " + username);
+                    throw new DatabaseOperationException("Failed to delete account: " + username, e);
                 }
             }
         }

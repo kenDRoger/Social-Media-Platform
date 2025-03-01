@@ -1,4 +1,5 @@
 
+<%@page import="com.mycompany.webapplicationdb.exception.UnauthorizedAccessException"%>
 <%@page import="com.mycompany.webapplicationdb.model.Account"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="com.mycompany.webapplicationdb.model.Accounts"%>
@@ -6,22 +7,21 @@
 
 
 <%
-    session = request.getSession();
-    if (session.getAttribute("username") == null) {
-        //TODO: handle unexpected access
-
+    //mema nalang mag kopya
+    try {
+        UnauthorizedAccessException.checkAccessAdmin(session);
+    } catch (UnauthorizedAccessException e) {
+        e.setAttributesForAdmin(session, request, e);
+        request.getRequestDispatcher("/error.jsp").forward(request, response);
+        return;
     }
 
     Accounts accounts = new Accounts();
     ArrayList<Account> users = accounts.getAccountsByRole("user");
     ArrayList<Account> admins = accounts.getAccountsByRole("admin");
 
-    String userRole = "";
-    if (request.getSession(false) != null) {
-        userRole = (String) session.getAttribute("user_role");
-    } else {
-        //TODO: handle unexpected access
-    }
+    String userRole = (String) session.getAttribute("user_role");
+    
 %>
 
 <!DOCTYPE html>
@@ -35,10 +35,10 @@
         <!-- Navigation Bar -->
         <nav>
             <ul>
-                <li><a href="admin.jsp">Home</a></li>
-                <li><a href="create.jsp">Create Account</a></li>
-                <li><a href="update.jsp">Update Account</a></li>
-                <li><a href="delete.jsp">Delete Account
+                <li><a href="${pageContext.request.contextPath}/admin/admin.jsp">Home</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/create.jsp">Create Account</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/update.jsp">Update Account</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/delete.jsp">Delete Account
                 <li><a href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
             </ul>
         </nav>

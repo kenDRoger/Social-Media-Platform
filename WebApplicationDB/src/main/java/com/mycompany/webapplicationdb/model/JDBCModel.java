@@ -1,3 +1,7 @@
+/**
+ * mema nalang mang kopya
+ * @author ken
+ */
 package com.mycompany.webapplicationdb.model;
 
 import java.sql.Connection;

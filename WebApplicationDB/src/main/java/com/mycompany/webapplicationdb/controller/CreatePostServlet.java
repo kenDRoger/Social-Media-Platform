@@ -1,6 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+/**
+ * mema nalang mang kopya
+ * @author ken
  */
 package com.mycompany.webapplicationdb.controller;
 
@@ -96,7 +96,7 @@ public class CreatePostServlet extends HttpServlet {
         } catch (DatabaseOperationException e) {
             // TODO: handle exceptions
         } catch (UnauthorizedAccessException ex) {
-            System.out.println("UNAUTHORIZED ACCESS");
+            ex.setAttributesForUser(request.getSession(), request, ex);
         } catch (BadRequestException ex) {
         } catch (InvalidTitleLengthException e) {
         } catch (EmptyTitleException e) {

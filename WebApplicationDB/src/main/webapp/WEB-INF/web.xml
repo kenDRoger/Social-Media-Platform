@@ -22,14 +22,6 @@
         <url-pattern>/SignUpServlet</url-pattern>
     </servlet-mapping>
     <servlet>
-        <servlet-name>DeletePostServlet</servlet-name>
-        <servlet-class>com.mycompany.webapplicationdb.controller.DeletePostServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>DeletePostServlet</servlet-name>
-        <url-pattern>/DeletePostServlet</url-pattern>
-    </servlet-mapping>
-    <servlet>
         <servlet-name>FollowUserServlet</servlet-name>
         <servlet-class>com.mycompany.webapplicationdb.controller.FollowUserServlet</servlet-class>
     </servlet>
@@ -77,14 +69,59 @@
         <servlet-name>AdminDeleteAccountsServlet</servlet-name>
         <url-pattern>/AdminDeleteAccountsServlet</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>AdminResolveServlet</servlet-name>
+        <servlet-class>com.mycompany.webapplicationdb.controller.AdminResolveServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminResolveServlet</servlet-name>
+        <url-pattern>/AdminResolveServlet</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>AdminUpdateAccountsServlet</servlet-name>
+        <servlet-class>com.mycompany.webapplicationdb.controller.AdminUpdateAccountsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminUpdateAccountsServlet</servlet-name>
+        <url-pattern>/AdminUpdateAccountsServlet</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>CreatePostServlet</servlet-name>
+        <servlet-class>com.mycompany.webapplicationdb.controller.CreatePostServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CreatePostServlet</servlet-name>
+        <url-pattern>/CreatePostServlet</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>DeletePostServlet</servlet-name>
+        <servlet-class>com.mycompany.webapplicationdb.controller.DeletePostServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DeletePostServlet</servlet-name>
+        <url-pattern>/DeletePostServlet</url-pattern>
+    </servlet-mapping>
     <error-page>
         <exception-type>com.mycompany.webapplicationdb.exception.DatabaseConnectionFailedException</exception-type>
+        <location>/error.jsp</location>
+    </error-page>
+    <error-page>
+        <exception-type>com.mycompany.webapplicationdb.exception.UnauthorizedAccessException</exception-type>
+        <location>/error.jsp</location>
+    </error-page>
+    <error-page>
+        <exception-type>com.mycompany.webapplicationdb.exception.BadRequestException</exception-type>
         <location>/error.jsp</location>
     </error-page>
     <!-- TODO: Add all exception here-->
     <error-page>
         <error-code>404</error-code>
         <location>/404.jsp</location>
+    </error-page>
+    <error-page>
+        <exception-type>Exception</exception-type>
+        <location>/error.jsp</location>
     </error-page>
     <session-config>
         <session-timeout>

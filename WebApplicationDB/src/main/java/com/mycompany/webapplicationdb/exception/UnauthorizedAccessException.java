@@ -1,5 +1,13 @@
+/**
+ * mema nalang mang kopya
+ * @author ken
+ */
+
 package com.mycompany.webapplicationdb.exception;
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 public class UnauthorizedAccessException extends Exception{
@@ -40,4 +48,43 @@ public class UnauthorizedAccessException extends Exception{
         super(error);
     }
     
+    public void setAttributesForAdmin(HttpSession session, HttpServletRequest request, UnauthorizedAccessException e){
+        request.setAttribute("error", "Unauthorized Access");
+        request.setAttribute("code", "UnauthorizedAccessException");
+        request.setAttribute("message", this.getMessage());
+        request.setAttribute("causes", new String[]{"User is not an admin", "No account is in use"});
+        request.setAttribute("exception", e);
+        Map<String, String> navigation = new HashMap<String, String>();
+        String userRole = (String) session.getAttribute("user_role");
+        if (userRole != null) {
+            if (userRole.equals("admin")) {
+                navigation.put("Home", request.getContextPath() + "/admin/admin.jsp");
+            } else if (userRole.equals("user")) {
+                navigation.put("Home", request.getContextPath() + "/landing.jsp");
+            }
+        }
+        navigation.put("Login", request.getContextPath() + "/login.jsp");
+        request.setAttribute("navigation", navigation);
+    }
+    
+    public void setAttributesForUser(HttpSession session, HttpServletRequest request, UnauthorizedAccessException e){
+        request.setAttribute("error", "Unauthorized Access");
+        request.setAttribute("code", "UnauthorizedAccessException");
+        request.setAttribute("message", this.getMessage());
+        request.setAttribute("causes", new String[]{"User is not a user", "No account is in use"});
+        request.setAttribute("exception", e);
+        Map<String, String> navigation = new HashMap<String, String>();
+        String userRole = (String) session.getAttribute("user_role");
+        //tester
+        System.out.println("userrole:"+userRole);
+        if (userRole != null) {
+            if (userRole.equals("admin") || userRole.equals("super_admin")) {
+                navigation.put("Home", request.getContextPath() + "/admin/admin.jsp");
+            } else if (userRole.equals("user")) {
+                navigation.put("Home", request.getContextPath() + "/landing.jsp");
+            }
+        }
+        navigation.put("Login", request.getContextPath() + "/login.jsp");
+        request.setAttribute("navigation", navigation);
+    }
 }

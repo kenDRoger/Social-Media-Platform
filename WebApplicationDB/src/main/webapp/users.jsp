@@ -1,9 +1,18 @@
+<%@page import="com.mycompany.webapplicationdb.exception.UnauthorizedAccessException"%>
 <%@page import="com.mycompany.webapplicationdb.model.Follows"%>
 <%@page import="com.mycompany.webapplicationdb.model.Following"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%> 
 <%@ page import="java.util.ArrayList" %> 
 
-<% //TODO: handle unexpected access 
+<% 
+    //mema nalang magkopya
+    try{
+        UnauthorizedAccessException.checkAccessUser(session);
+    }catch(UnauthorizedAccessException e){
+        e.setAttributesForUser(session, request, e);
+        request.getRequestDispatcher("/error.jsp").forward(request, response);
+        return;
+    }
 
     //get all the follows of current user
     Following following = new Following();

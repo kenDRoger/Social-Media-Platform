@@ -1,6 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+/**
+ * mema nalang mang kopya
+ * @author ken
  */
 package com.mycompany.webapplicationdb.controller;
 
@@ -77,7 +77,7 @@ public class SubmitHelpServlet extends HttpServlet {
             // TODO: handle exception
             System.out.println("DatabaseOperationException");
         } catch (UnauthorizedAccessException ex) {
-            System.out.println("UnauthorizedAccessException");
+            ex.setAttributesForUser(request.getSession(), request, ex);
         } catch (BadRequestException e) {
         } catch (InvalidContentLengthException e) {
         } catch (EmptyContentException e) {

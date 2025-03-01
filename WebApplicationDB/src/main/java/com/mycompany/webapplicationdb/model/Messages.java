@@ -1,3 +1,7 @@
+/**
+ * mema nalang mang kopya
+ * @author ken
+ */
 package com.mycompany.webapplicationdb.model;
 
 import java.sql.Connection;
@@ -9,31 +13,32 @@ import java.util.Comparator;
 import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
 
 public class Messages extends ArrayList<Message> {
-    public Messages() throws DatabaseOperationException{
-        try(JDBCModel jdbcModel = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE)){
+    public Messages() throws DatabaseOperationException {
+        try (JDBCModel jdbcModel = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE)) {
             for (Message message : jdbcModel.getMessages()) {
-            this.add(message);
-        }
-        }catch(SQLException e){
+                this.add(message);
+            }
+        } catch (SQLException e) {
             throw new DatabaseOperationException("Unable to get Messages table", e);
         }
-        
+
     }
-    public Message getMessageByUsername(String username){
-        for(Message message : this){
-            if(message.getUsername().equals(username)){
+
+    public Message getMessageByUsername(String username) {
+        for (Message message : this) {
+            if (message.getUsername().equals(username)) {
                 return message;
             }
         }
         return null;
-    }   
+    }
 
-    public void addMessage(String username, String subject, String content) throws DatabaseOperationException{
+    public void addMessage(String username, String subject, String content) throws DatabaseOperationException {
         Message newMessage = new Message(username, subject, content);
 
         String query3 = "INSERT INTO messages (username, subject, content) VALUES (?, ?, ?)";
         try (JDBCModel jdbcModel = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE);
-             Connection conn = jdbcModel.getConnection()) {
+                Connection conn = jdbcModel.getConnection()) {
 
             conn.setAutoCommit(false); // Start transaction
 
@@ -42,7 +47,7 @@ public class Messages extends ArrayList<Message> {
                 stmt.setString(2, newMessage.getSubject());
                 stmt.setString(3, newMessage.getContent());
 
-                //tester
+                // tester
                 System.out.println("Query-addMessage:" + stmt);
 
                 stmt.executeUpdate();
@@ -58,9 +63,23 @@ public class Messages extends ArrayList<Message> {
         }
         this.add(newMessage);
     }
-    
-    //TODO: removeMessage method for resolveServlet
-    
+
+    public void deleteMessage(String subject) throws DatabaseOperationException {
+        String query = "delete from messages where subject = ?";
+        try (JDBCModel model = new JDBCModel(MySQLCredentials.DEFAULT_DATABASE); Connection conn = model.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, subject);
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw new DatabaseOperationException("Unable to delete message", e);
+            }
+            conn.commit();
+        } catch (SQLException ex) {
+            throw new DatabaseOperationException("Unable to establish connection", ex);
+        }
+    }
 
     public ArrayList<Message> get5LatestMessages() {
         ArrayList<Message> latestMessages = new ArrayList<>();
@@ -74,7 +93,8 @@ public class Messages extends ArrayList<Message> {
             } else {
                 int oldestIndex = 0;
                 for (int j = 1; j < 5; j++) {
-                    if (latestMessages.get(j).getDate_created().after(latestMessages.get(oldestIndex).getDate_created())) {
+                    if (latestMessages.get(j).getDate_created()
+                            .after(latestMessages.get(oldestIndex).getDate_created())) {
                         oldestIndex = j;
                     }
                 }
@@ -101,6 +121,5 @@ public class Messages extends ArrayList<Message> {
     public String toString() {
         return "Messages{" + "messages=" + super.toString() + '}';
     }
-    
-    
+
 }

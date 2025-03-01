@@ -1,10 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+/**
+ * mema nalang mang kopya
+ * @author ken
  */
 package com.mycompany.webapplicationdb.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,32 +40,52 @@ public class AdminUpdateAccountsServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseOperationException, UnauthorizedAccessException, ValueValidation.InvalidUserNameLengthException, ValueValidation.EmptyUserNameException, ValueValidation.InvalidUserNameException, ValueValidation.InvalidPasswordLengthException, ValueValidation.EmptyPasswordException, ValueValidation.InvalidUserRoleException, ValueValidation.EmptyUserRoleException {
+            throws ServletException, IOException, DatabaseOperationException, UnauthorizedAccessException,
+            ValueValidation.InvalidUserNameLengthException, ValueValidation.EmptyUserNameException,
+            ValueValidation.InvalidUserNameException, ValueValidation.InvalidPasswordLengthException,
+            ValueValidation.EmptyPasswordException, ValueValidation.InvalidUserRoleException,
+            ValueValidation.EmptyUserRoleException {
         response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession();
         UnauthorizedAccessException.checkAccessAdmin(session);
 
         Accounts accounts = new Accounts();
-        //get parameters
+        // get parameters
         Enumeration<String> paramNames = request.getParameterNames();
+
+        // get unupdated accounts
+        ArrayList<Account> beforeUpdate = new ArrayList<>();
+
+        ArrayList<Account> afterUpdate = new ArrayList<>();
         while (paramNames.hasMoreElements()) {
             String paramName = paramNames.nextElement();
             if (paramName.startsWith("username_")) {
+
                 String oldUsername = paramName.substring(9); // Extract original username
+                //tester
+                System.out.println("oldUsername:" + oldUsername);
+
+                Account oldaccount = accounts.findAccountByUsername(oldUsername);
+                beforeUpdate.add(oldaccount);
+
                 String newUsername = request.getParameter("username_" + oldUsername);
                 String newPassword = request.getParameter("password_" + oldUsername);
                 String newUserRole = request.getParameter("user_role_" + oldUsername);
                 ValueValidation.validateUserName(newUsername);
                 ValueValidation.validatePassword(newPassword);
                 ValueValidation.validateUserRole(newUserRole);
-                
+                Account account = new Account(newUsername, newPassword, newUserRole);
+                afterUpdate.add(account);
                 // Update the user in the database
-                accounts.updateAccount(oldUsername, new Account(newUsername, newPassword, newUserRole));
+                accounts.updateAccount(oldUsername, account);
             }
         }
-        
-        //TODO: change this? look at issue
-        response.sendRedirect("admin/update.jsp");
+
+        request.setAttribute("result", beforeUpdate);
+        request.setAttribute("result1", afterUpdate);
+        request.setAttribute("message", "Before Update accounts: " + beforeUpdate.size());
+        request.setAttribute("message1", "After Update accounts: " + afterUpdate.size());
+        request.getRequestDispatcher("admin/result.jsp").forward(request, response);
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -73,10 +94,10 @@ public class AdminUpdateAccountsServlet extends HttpServlet {
         try {
             processRequest2(request, response);
         } catch (DatabaseOperationException ex) {
-            //TODO: handle exceptions
+            // TODO: handle exceptions
             Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
         } catch (UnauthorizedAccessException ex) {
-            Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
+            ex.setAttributesForAdmin(request.getSession(), request, ex);
         } catch (ValueValidation.InvalidUserNameLengthException ex) {
             Logger.getLogger(AdminUpdateAccountsServlet.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ValueValidation.EmptyUserNameException ex) {
@@ -94,7 +115,8 @@ public class AdminUpdateAccountsServlet extends HttpServlet {
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the
+    // + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *

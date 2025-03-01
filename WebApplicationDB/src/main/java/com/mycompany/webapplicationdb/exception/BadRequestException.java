@@ -1,6 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+/**
+ * mema nalang mang kopya
+ * @author ken
  */
 package com.mycompany.webapplicationdb.exception;
 
@@ -9,7 +9,6 @@ package com.mycompany.webapplicationdb.exception;
  * @author ken
  */
 public class BadRequestException extends Exception {
-    //TODO: Implement in everything for handling exceptions with invalid requests
 
     /**
      * Param should be

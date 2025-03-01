@@ -1,6 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+/**
+ * mema nalang mang kopya
+ * @author ken
  */
 package com.mycompany.webapplicationdb.controller;
 
@@ -105,6 +105,7 @@ public class DeletePostServlet extends HttpServlet {
         } catch (NoPostFoundException ex) {
             System.out.println("No post found exception");
         } catch (UnauthorizedAccessException e) {
+            e.setAttributesForUser(request.getSession(), request, e);
         } catch (BadRequestException e) {
         }
     }

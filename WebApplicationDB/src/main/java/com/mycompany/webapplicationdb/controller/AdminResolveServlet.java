@@ -4,9 +4,14 @@
  */
 package com.mycompany.webapplicationdb.controller;
 
+import com.mycompany.webapplicationdb.exception.BadRequestException;
+import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
+import com.mycompany.webapplicationdb.exception.UnauthorizedAccessException;
+import com.mycompany.webapplicationdb.model.Messages;
 import java.io.IOException;
-import java.util.ArrayList;
-
+import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -14,19 +19,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.mycompany.webapplicationdb.exception.BadRequestException;
-import com.mycompany.webapplicationdb.exception.DatabaseOperationException;
-import com.mycompany.webapplicationdb.exception.UnauthorizedAccessException;
-import static com.mycompany.webapplicationdb.exception.UnauthorizedAccessException.checkAccessAdmin;
-import com.mycompany.webapplicationdb.model.Account;
-import com.mycompany.webapplicationdb.model.Accounts;
-
 /**
  *
  * @author ken
  */
-@WebServlet(name = "DeleteAccountsServlet", urlPatterns = {"/DeleteAccountsServlet"})
-public class AdminDeleteAccountsServlet extends HttpServlet {
+@WebServlet(name = "AdminResolveServlet", urlPatterns = {"/AdminResolveServlet"})
+public class AdminResolveServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -38,50 +36,32 @@ public class AdminDeleteAccountsServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest2(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, DatabaseOperationException, UnauthorizedAccessException, BadRequestException {
+            throws ServletException, IOException, UnauthorizedAccessException, BadRequestException, DatabaseOperationException {
         response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession();
-        checkAccessAdmin(session);
+        UnauthorizedAccessException.checkAccessAdmin(session);
         
-        Object[] accountsParam = request.getParameterValues("accounts");
-        if(accountsParam==null || accountsParam.length==0){
-            request.setAttribute("error", "No selected Accounts");
-            request.getRequestDispatcher("admin/delete.jsp").forward(request, response);
-            return;
-        }
-        BadRequestException.checkIfValidRequests(accountsParam);
-
-        Accounts accounts = new Accounts();
-        //get a list of accounts of accountsParam
-        ArrayList<Account> deletingAccounts = new ArrayList<>();
-        for(Object account : accountsParam){
-            if(account==null){
-                throw new BadRequestException("Null account");
-            }
-            String name = (String) account;
-            Account a = accounts.findAccountByUsername(name);
-            if(a==null){
-                throw new BadRequestException("Account not found");
-            }
-            deletingAccounts.add(a);
-        }
-        accounts.deleteBulkAccounts(accountsParam);
-
-        //TODO: test this
-        request.setAttribute("message", "Deleted Accounts");
-        request.setAttribute("result", deletingAccounts);
-        request.getRequestDispatcher("admin/result.jsp").forward(request, response);
+        String subject = request.getParameter("subject");
+        BadRequestException.checkIfValidRequests(subject);
+        
+        Messages messages = new Messages();
+        
+        messages.deleteMessage(subject);
+        
+        //redirect to admin
+        response.sendRedirect("admin/admin.jsp");
     }
+    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try{
             processRequest2(request, response);
-        } catch (DatabaseOperationException ex) {
-            //TODO: handle exceptions
         } catch (UnauthorizedAccessException ex) {
+            //TODO: handle exception
             ex.setAttributesForAdmin(request.getSession(), request, ex);
         } catch (BadRequestException ex) {
+        } catch (DatabaseOperationException ex) {
         }
     }
 
