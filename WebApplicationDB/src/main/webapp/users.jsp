@@ -77,6 +77,7 @@
         <p style="color:green;">${successUnfollow}</p>
     </c:if>
     <%if (!follows.ifFollowsFull()) {%>
+    <div class="accounts-block">
     <h2>Follow a New User</h2>
     <form action="FollowUserServlet" method="post">
         <label for="newUser">Username:</label>
@@ -92,6 +93,7 @@
             <p style="color:green;">${successFollow}</p>
         </c:if>
     </form>
+    </div>
     <%}%>
 </body>
 </html>

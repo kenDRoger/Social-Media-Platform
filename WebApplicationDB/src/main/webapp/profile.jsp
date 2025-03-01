@@ -55,6 +55,7 @@
         <h1>Welcome, <%= currUser%>!</h1>
 
         <!-- Form to create a new post -->
+        <div class="accounts-block">
         <h2>Create a New Post</h2>
         <form action="CreatePostServlet" method="post">
             <input type="hidden" id="username" name="username" value="<%= currUser%>">
@@ -69,6 +70,7 @@
                 <p style="color:red;">${error}</p>
             </c:if>
         </form>
+        </div>
         
         <%
             if (!posts.ifPostsNull()) {

@@ -46,6 +46,10 @@
         <%} else {%>
         <form action="${pageContext.request.contextPath}/AdminDeleteAccountsServlet" method="post">
             <div class="accounts-block">
+                <input type="submit" value="Delete Accounts">
+                <c:if test="${not empty error}">
+                    <p style="color:red;">${error}</p>
+                </c:if>
                 <h2>List of Users</h2>
                 <table border="1">
                     <tr><th>Username</th><th>Password</th><th>Role</th><th>Delete</th></tr>
@@ -76,12 +80,11 @@
                     <%}
                         }%>
                 </table>
-                <input type="submit" value="Delete Accounts">
-                <c:if test="${not empty error}">
-                    <p style="color:red;">${error}</p>
-                </c:if>
+                
                 <%}%>
+                
             </div>
+                
         </form>
         <%}%>
     </body>

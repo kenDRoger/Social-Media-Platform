@@ -42,7 +42,7 @@
 
 
         %>
-
+        <div class="accounts-block">
         <form action="${pageContext.request.contextPath}/AdminCreateAccountServlet" method="post">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required><br><br>
@@ -70,6 +70,7 @@
                 <p style="color:red;">${error}</p>
             </c:if>
         </form>
+            </div>
 
     </body>
 </html>

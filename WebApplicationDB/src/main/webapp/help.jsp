@@ -30,6 +30,7 @@
                 <li><a href="LogoutServlet">Logout</a></li>
             </ul>
         </nav>
+        <div class="accounts-block">
         <h1>Contact Admin</h1>
 
         <form action="SubmitHelpServlet" method="post">
@@ -50,6 +51,7 @@
                 <p style="color:red;">${error}</p>
             </c:if>
         </form>
+        </div>
     </body>
 </html>
 

@@ -21,7 +21,7 @@
     ArrayList<Account> admins = accounts.getAccountsByRole("admin");
 
     String userRole = (String) session.getAttribute("user_role");
-    
+
 %>
 
 <!DOCTYPE html>
@@ -39,7 +39,7 @@
                 <li><a href="${pageContext.request.contextPath}/admin/create.jsp">Create Account</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/update.jsp">Update Account</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/delete.jsp">Delete Account
-                <li><a href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
+                        <li><a href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
             </ul>
         </nav>
         <h1>Update Accounts</h1>
@@ -49,6 +49,10 @@
         <%} else {%>
         <form action="${pageContext.request.contextPath}/AdminUpdateAccountsServlet" method="post">
             <div class="accounts-block">
+                <input type="submit" value="Update Accounts">
+            <c:if test="${not empty error}">
+                <p style="color:red;">${error}</p>
+            </c:if>
                 <h2>List of Users</h2>
                 <table border="1">
                     <tr><th>Username</th><th>Password</th><th>Role</th><th>New Username</th><th>New Password</th><th>New User Role</th></tr>
@@ -102,12 +106,11 @@
                     <%}
                         }%>
                 </table>
-                <input type="submit" value="Update Accounts">
-                <c:if test="${not empty error}">
-                    <p style="color:red;">${error}</p>
-                </c:if>
+
                 <%}%>
+
             </div>
+            
         </form>
         <%}%>
 
